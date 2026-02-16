@@ -103,7 +103,8 @@ Initialize a new triage sprint: define scope, discover issues, build the process
 ### Step 7: Commit and Report
 
 1. Commit the new run files to the triage repo.
-2. Display a summary to the user:
+2. Push to the remote. If the push fails (e.g., remote is ahead), ask the user whether to rebase and retry or skip the push.
+3. Display a summary to the user:
 
 ```
 Sprint created: 2026-02-16_diagnostics_windows

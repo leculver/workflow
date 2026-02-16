@@ -150,6 +150,7 @@ When creating a fix:
    - Updated `runs/*/run.json` (if queue was modified)
 2. Commit with message: `triage: <owner>/<repo>#<number> — <status> (<category>)`
 3. Example: `triage: dotnet/diagnostics#5632 — reproduced (feature-request)`
+4. Push to the remote. If the push fails (e.g., remote is ahead), ask the user whether to rebase and retry or skip the push.
 
 ## Validation
 

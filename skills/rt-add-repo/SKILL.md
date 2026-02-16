@@ -131,6 +131,7 @@ summaries/<owner>-<repo>/
 
 1. Verify `config/repos.json` is valid JSON.
 2. Commit: `config: add repo <owner>/<repo>`
+3. Push to the remote. If the push fails (e.g., remote is ahead), ask the user whether to rebase and retry or skip the push.
 
 ### Step 9: Report
 
