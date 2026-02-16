@@ -1,26 +1,27 @@
 ---
 name: rt-continue-issue
 description: >
-  Loads all prior context for a specific issue and enters interactive investigation mode. Reads the existing
-  JSON report, markdown summary, reproduction artifacts, fix branches, and latest GitHub comments. Use when
-  you want to do a deep dive on a previously triaged issue, continue debugging, or refine a fix.
+  Loads all prior context for a specific issue and presents a briefing to the developer. Reads the existing
+  JSON report, captain's log, reproduction artifacts, fix branches, and latest GitHub comments. Does NOT
+  autonomously investigate — instead primes the conversation so the developer can ask followups, try things,
+  and direct the investigation interactively. Use when you want to pick up where you left off on an issue.
 ---
 
 # Continue Issue
 
-Resume investigation on a previously triaged issue with full context loaded.
+Load all prior context for an issue and brief the developer for an interactive investigation session.
 
 ## When to Use
 
-- Deep diving into a previously triaged issue
-- Continuing debugging after initial automated triage
-- Refining or testing a fix candidate
-- Re-investigating after new comments appear on the issue
+- Picking up a previously triaged issue for hands-on work
+- Reviewing what was done before and deciding next steps
+- Starting an interactive debugging or code review session on a specific issue
 
 ## When Not to Use
 
 - First-time triage of an issue (use `rt-triage-issue`)
 - Batch processing (use `rt-triage-loop`)
+- Fully automated re-investigation (use `rt-triage-issue` with the issue number)
 
 ## Inputs
 
@@ -46,65 +47,68 @@ Before doing anything else, gather ALL context:
 
 **c) Existing JSON report:**
 - Read `issues/<owner>-<repo>/<issue_number>/report.json`.
-- Read the captain's log at `issues/<owner>-<repo>/<issue_number>/log.md` to understand the full investigation arc across sessions.
-- This is the best source of "what happened when" — read the whole thing.
 
-**d) Existing Markdown report:**
+**d) Captain's log:**
+- Read `issues/<owner>-<repo>/<issue_number>/log.md` in full.
+- This is the best source of "what happened when" — understand the full investigation arc.
+
+**e) Existing Markdown report:**
 - Read `issues/<owner>-<repo>/<issue_number>/report.md`.
 
-**e) Reproduction folder:**
+**f) Reproduction folder:**
 - Check if `<workspace>/repros/issue_<issue_number>/` exists.
 - If so, inventory its contents: repro apps, dumps, artifacts, logs, scripts.
-- Understand what was already attempted.
+- Check committed repro source in `issues/<owner>-<repo>/<issue_number>/repro/` too.
 
-**f) Fix branches:**
+**g) Fix branches:**
 - Check if a branch named `issue_<issue_number>` exists in the source repo(s).
 - If so, review the diff against main to understand the candidate fix.
 
-**g) Open PRs:**
+**h) Open PRs:**
 - Check for open PRs referencing this issue.
 
-### Step 2: Present Context Summary
+### Step 2: Present Briefing
 
-Before proceeding, present a clear summary:
-- Current triage status and category
-- What reproduction was attempted and the outcome
-- Whether a fix candidate exists and its confidence level
-- NEW: Any comments/activity since last triage
-- What remains to be done or investigated
+Present a clear, structured briefing to the developer. This is the **primary output** of this skill. Include:
 
-Ask the user what direction to take, or proceed with the most logical next step.
+1. **Issue summary** — Title, category, link, key details from the body
+2. **Current triage status** — Status, staleness, affected repo, platforms
+3. **Investigation history** — What was attempted across all sessions (from log.md)
+4. **Reproduction status** — Was it reproduced? What repro artifacts exist? Where?
+5. **Fix status** — Is there a candidate fix? Branch name, confidence, what it changes
+6. **Open PRs** — Any PRs already addressing this issue
+7. **New activity** — Any GitHub comments or changes since the last session
+8. **Suggested next steps** — Based on current state, what are the logical things to try next
 
-### Step 3: Continue Investigation
+### Step 3: Wait for the Developer
 
-Based on prior work and current state, continue where we left off:
+**STOP HERE.** Do not autonomously investigate, reproduce, or fix anything.
 
-- **Not reproduced?** Try again with new approach, different inputs, or new information from comments.
-- **Reproduced but no fix?** Deepen root cause analysis, attempt a fix.
-- **Fix exists but low confidence?** Run more tests, refine the fix.
-- **Platform-blocked?** If now on the right platform, attempt reproduction.
-- **Stale/already-fixed?** Verify and update status if needed.
-- **Feature request?** Check if implementation has landed since last check.
+The developer is now in the driver's seat. Wait for them to:
+- Ask questions about the issue or prior work
+- Request specific actions ("try reproducing with X", "look at function Y", "check if Z was fixed")
+- Direct the investigation in a particular direction
+- Ask you to run commands, read code, build repros, etc.
 
-Follow the same [reproduction rules](../rt-triage-issue/references/reproduction-rules.md) and record all steps.
+Follow the developer's lead. When they ask you to do something, do it and report back. This is an interactive session, not an automated triage run.
 
-### Step 4: Update Reports with Versioning
+### Step 4: Update Reports (when the developer says they're done)
+
+When the developer indicates the session is over (or asks you to save progress):
 
 **JSON update:**
-- Overwrite `report.json` in place — it is always the current source of truth.
-- Set `manually_investigated` to `true` (this was touched by a developer).
+- Overwrite `report.json` in place with any updated triage status, observations, or fix info.
+- Set `manually_investigated` to `true`.
 - Write atomically (`.tmp` then rename).
 
 **Captain's log — append a new session entry to `log.md`:**
 - Do NOT overwrite previous entries — append only.
 - Add a new `## <timestamp> — <platform> — manual investigation` section.
 - Record: what was attempted, what was discovered, what changed.
-- Clearly distinguish new findings from prior work.
 
 **Markdown update:**
 - Overwrite `report.md` with the latest findings.
 - Clearly mark what is NEW from this session vs. carried over from prior work.
-- Use a `## Session: <date>` section header for new findings.
 
 ### Step 5: Commit
 
@@ -112,10 +116,10 @@ Commit with message: `continue: <owner>/<repo>#<number> — <summary of new find
 
 ## Validation
 
-- [ ] New session entry appended to `log.md` (not overwriting prior entries)
-- [ ] `manually_investigated` set to `true`
-- [ ] New observations appended (not replacing old ones)
-- [ ] `report.md` clearly distinguishes new vs. prior work
+- [ ] All prior context was loaded and presented in the briefing
+- [ ] Developer was NOT preempted — no autonomous investigation
+- [ ] When saving: session entry appended to `log.md` (not overwriting prior entries)
+- [ ] When saving: `manually_investigated` set to `true`
 - [ ] Source repos back on main branch
 - [ ] Results committed to triage repo
 
@@ -123,7 +127,8 @@ Commit with message: `continue: <owner>/<repo>#<number> — <summary of new find
 
 | Pitfall | Solution |
 |---------|----------|
-| Overwriting prior work | `report.json` is overwritten (that's fine), but NEVER overwrite `log.md` — append only |
+| Jumping into investigation without being asked | STOP after the briefing — wait for developer direction |
 | Missing new GitHub comments | Compare `fetched_at_utc` with comment dates |
 | Can't find the repo | Provide `repo` explicitly if auto-detection fails |
-| Repro folder is huge | Don't re-read dumps or large artifacts — summarize what's there |
+| Repro folder is huge | Don't re-read dumps — summarize what files exist |
+| Forgetting to save | Remind the developer to save progress before ending the session |
