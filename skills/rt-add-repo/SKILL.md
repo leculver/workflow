@@ -114,7 +114,11 @@ The local checkout must follow the fork workflow convention:
 5. If `origin` equals `upstream`, warn the user: "origin and upstream are the same — you need a fork to push fix branches. Fork the repo on GitHub first, then set origin to your fork."
 6. Validate the same for any `source_alt` paths and related repo checkouts.
 
-### Step 6: Create Directory Structure
+### Step 6: Update .gitignore
+
+If the local checkout path is under the triage repo (e.g., `./clrmd`, `./diagnostics`), add it to `.gitignore` so the cloned repo isn't accidentally committed to the triage repo. Skip if already listed.
+
+### Step 7: Create Directory Structure
 
 Create the issue and summary directories:
 
@@ -123,12 +127,12 @@ issues/<owner>-<repo>/
 summaries/<owner>-<repo>/
 ```
 
-### Step 7: Validate and Commit
+### Step 8: Validate and Commit
 
 1. Verify `config/repos.json` is valid JSON.
 2. Commit: `config: add repo <owner>/<repo>`
 
-### Step 8: Report
+### Step 9: Report
 
 ```
 Repository configured: dotnet/runtime
@@ -156,3 +160,4 @@ Ready! Run: "set up a sprint for dotnet/runtime"
 | Too many auto-detected areas | Let user review and prune |
 | origin == upstream | User needs a fork; warn and link to GitHub fork page |
 | upstream missing | Add it automatically with `git remote add upstream` |
+| Checkout under triage repo | Add to `.gitignore` so it's not committed |
