@@ -72,7 +72,7 @@ Use this table format for all sections:
 ```
 
 Column details:
-- **Issue**: Link to local `report.md` (relative path)
+- **Issue**: Link to local `report.md` (relative path from the summary file, e.g., `../../issues/<owner>-<repo>/<N>/report.md`)
 - **GitHub**: Link to the GitHub issue page
 - **Title**: Issue title (escape `|` as `&#124;`)
 - **State**: 🔵 Open / 🔴 Closed (use blue/red for colorblind accessibility)
