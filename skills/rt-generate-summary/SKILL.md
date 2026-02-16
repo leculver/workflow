@@ -57,11 +57,11 @@ Build a comprehensive triage summary dashboard from all issue report data.
 **Section 1 — Should Be Closed:**
 Issues with status in: `already-fixed`, `already-implemented`, `by-design`, `stale`, `wont-fix`, `duplicate`.
 
-**Section 2 — Documentation Issues:**
-Issues with category `docs` that are NOT in Section 1.
+**Section 2 — By Area:**
+Everything else (not in Section 1, not docs), classified using the area rules from `config/repos.json`. Sort area subsections by issue count descending. Issues not matching any area go in "Other / General".
 
-**Section 3 — By Area:**
-Everything else, classified using the area rules from `config/repos.json`. Sort area subsections by issue count descending. Issues not matching any area go in "Other / General".
+**Section 3 — Documentation Issues:**
+Issues with category `docs` that are NOT in Section 1. Single combined table (not split by area).
 
 ### Step 4: Generate Markdown
 
@@ -82,9 +82,10 @@ Column details:
 - **Status**: Triage status value
 - **Summary**: First sentence of `status_reason`, max 150 chars
 
-Include before the sections:
+Include before the issue sections (in this order):
 1. **Overview stats table**: Total issues, open/closed counts, fix candidates, manually investigated, by-status breakdown.
-2. **Open Pull Requests table**: All open PRs with linked issues.
+2. **Changes Since Last Summary**: What's new since the prior summary (only if a prior summary exists). See Step 5.
+3. **Open Pull Requests table**: All open PRs with linked issues.
 
 See [summary format reference](references/summary-format.md) for the full template.
 
