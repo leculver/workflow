@@ -92,12 +92,22 @@ Follow the [reproduction rules](references/reproduction-rules.md):
 7. Dumps are NOT committed (too large). Instead, commit the repro source and a `repro.sh`/`repro.bat` script to regenerate them. See [reproduction rules](references/reproduction-rules.md) for details.
 8. If reproduction requires a different platform, set status to `platform-blocked` and note which platform.
 
-### Step 7: Attempt Fix (unless skip_fix, and only if reproduced)
+### Step 7: Attempt Fix (unless skip_fix)
 
-1. Only attempt if triage status is `reproduced` and you have high confidence.
-2. Create a branch `issue_<NUMBER>` in the appropriate repo.
-3. Make the fix, run targeted tests if possible.
-4. Record the fix details (summary, confidence, branch, diff) in the JSON.
+Attempt a fix in any of these cases:
+- The bug was **reproduced** and the root cause is understood.
+- The bug was **not reproduced** but the root cause is obvious from code inspection (e.g., clear null check missing, off-by-one, wrong condition). The fix should still be proposed — it helps the developer understand the issue even without a repro.
+- A **feature request** has a straightforward implementation path.
+
+Do NOT attempt a fix if:
+- The issue is too vague to understand what the fix should be.
+- The fix would require major architectural changes or is highly speculative.
+
+When creating a fix:
+1. Create a branch `issue_<NUMBER>` in the appropriate repo.
+2. Make the fix, run targeted tests if possible.
+3. Record the fix details (summary, confidence, branch, diff) in the JSON.
+4. Set `fix.confidence` lower for fixes without reproduction (e.g., 0.4–0.6 vs. 0.8+ for reproduced fixes).
 5. Push the branch to `origin` (the user's fork), NOT `upstream`.
 6. Do NOT include `Co-authored-by: Copilot` in fix commit messages — these are proposed fixes authored by the developer.
 7. Return to the main branch when done.

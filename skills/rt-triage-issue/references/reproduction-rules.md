@@ -67,7 +67,12 @@ These should be set relative to the repro's working directory (e.g., `./repros/i
 
 ## Fix Attempt Rules
 
-When reproduction is successful and you can identify a high-confidence fix:
+Attempt a fix when:
+- Reproduction succeeded and root cause is understood, OR
+- Root cause is obvious from code inspection even without reproduction (e.g., clear null check, off-by-one), OR
+- A feature request has a straightforward implementation path.
+
+The goal is to produce a proposed fix the developer can review to understand the issue, even if the fix isn't verified by a repro. Use lower `fix.confidence` values (0.4–0.6) for unverified fixes.
 
 1. Include a short explanation in the JSON `fix` section.
 2. Include an optional unified diff string (do NOT apply it to main automatically).
