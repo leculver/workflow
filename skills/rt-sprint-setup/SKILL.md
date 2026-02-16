@@ -79,7 +79,7 @@ Initialize a new triage sprint: define scope, discover issues, build the process
 {
   "id": "<run_id>",
   "repo": "<owner/repo>",
-  "platform": "<windows|linux|macos>",
+  "platform": "<any|windows|linux|macos>",
   "started_at": "<ISO 8601 UTC>",
   "ended_at": null,
   "status": "in-progress",

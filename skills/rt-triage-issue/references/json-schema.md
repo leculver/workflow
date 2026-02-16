@@ -23,7 +23,7 @@ The canonical schema is at `config/schemas/issue-report.schema.json` in the tria
     "status": "<see triage-categories.md>",
     "status_reason": "<one sentence explanation>",
     "affected_repo": "<repo short name or 'unknown'>",
-    "requires_platform": ["windows", "linux", "macos"],
+    "requires_platform": ["any"],
     "staleness": "active|stale|superseded",
     "superseded_by": <int or null>
   },

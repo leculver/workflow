@@ -36,4 +36,8 @@
 
 ## triage.requires_platform
 
-Array of one or more: `windows`, `linux`, `macos`
+Array of one or more: `any`, `windows`, `linux`, `macos`
+
+- Use `["any"]` when the issue is not platform-specific and should reproduce everywhere.
+- Use specific platforms (e.g., `["linux"]`, `["windows", "linux"]`) when reproduction requires those platforms.
+- Do NOT combine `any` with specific platforms — if it's `any`, that's the only entry.
