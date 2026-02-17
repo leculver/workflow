@@ -108,6 +108,7 @@ For each issue in the queue, invoke the `rt-triage-issue` workflow with these mo
 
 1. Commit each processed issue: `platform-reprocess: <owner>/<repo>#<number> — <status> (<platform>)`
 2. Push to the remote after each commit. If the push fails (e.g., remote is ahead), ask the user whether to rebase and retry or skip the push.
+3. Do NOT include `Co-authored-by: Copilot` in commit messages.
 3. When queue is empty:
    - Mark the platform sprint as completed.
    - Show summary:

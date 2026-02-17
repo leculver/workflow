@@ -141,6 +141,8 @@ When the developer indicates the session is over (or asks you to save progress):
 
 Commit with message: `continue: <owner>/<repo>#<number> — <summary of new findings>`
 
+Do NOT include `Co-authored-by: Copilot` in commit messages.
+
 ## Validation
 
 - [ ] All prior context was loaded and presented in the briefing

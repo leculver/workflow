@@ -83,6 +83,8 @@ If any log.md or report.json files were updated:
 2. Commit: `bookkeeping: flush progress for <owner>/<repo>#<number>` (one commit per issue, or batch if multiple).
 3. Push to origin.
 
+Do NOT include `Co-authored-by: Copilot` in commit messages.
+
 ## Concurrent Session Safety
 
 Multiple Copilot sessions may be running simultaneously. The rename-before-flush pattern provides lightweight coordination:

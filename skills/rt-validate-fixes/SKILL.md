@@ -124,6 +124,8 @@ For branch-missing fixes:
 
 Commit any report updates: `validate-fixes: <owner>/<repo> — updated N reports`
 
+Do NOT include `Co-authored-by: Copilot` in commit messages.
+
 ## Validation
 
 - [ ] All fix branches checked for existence

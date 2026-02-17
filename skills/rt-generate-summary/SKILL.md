@@ -142,6 +142,7 @@ See [summary format reference](references/summary-format.md) for the full templa
 5. Optionally copy to a custom `output` path if provided.
 6. Commit: `summary: <owner>/<repo> — <date> (<N> issues)`
 7. Push to the remote. If the push fails (e.g., remote is ahead), ask the user whether to rebase and retry or skip the push.
+8. Do NOT include `Co-authored-by: Copilot` in commit messages.
 
 ## Validation
 

@@ -86,6 +86,8 @@ Write a markdown file that captures the investigation naturally. There is **no f
 2. Commit: `notes: <slug>`
 3. Push to origin.
 
+Do NOT include `Co-authored-by: Copilot` in commit messages.
+
 ## Validation
 
 - [ ] Note captures the correct topic, not unrelated prior conversation

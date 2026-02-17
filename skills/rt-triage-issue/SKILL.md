@@ -165,6 +165,7 @@ When creating a fix:
 2. Commit with message: `triage: <owner>/<repo>#<number> — <status> (<category>)`
 3. Example: `triage: dotnet/diagnostics#5632 — reproduced (feature-request)`
 4. Push to the remote. If the push fails (e.g., remote is ahead), ask the user whether to rebase and retry or skip the push.
+5. Do NOT include `Co-authored-by: Copilot` in commit messages (applies to both triage repo commits and fix branch commits).
 
 ## Validation
 

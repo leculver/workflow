@@ -108,6 +108,7 @@ Invoke `rt-bookkeeping` to pull the triage repo and flush any pending `.progress
 
 1. Commit the new run files to the triage repo.
 2. Push to the remote. If the push fails (e.g., remote is ahead), ask the user whether to rebase and retry or skip the push.
+3. Do NOT include `Co-authored-by: Copilot` in commit messages.
 3. Display a summary to the user:
 
 ```
