@@ -58,7 +58,13 @@ Use `rt-local-tools` to resolve the `cdb` path.
 2. Build the SOS path: `<diagnostics_path>\artifacts\bin\Windows_NT.<arch>.<config>\sos.dll`
 3. Verify the file exists. If not, tell the user: "SOS not found at `<path>`. Build with `build.cmd` first."
 
-### Step 2: Interactive CDB Session
+### Step 2: Choose Mode
+
+**Use non-interactive mode** (`cdb -z <dump> -c "cmds;qq"`) for scripted test runs — running commands and checking results. Pipe output to a file and use `Select-String` to validate. This is the default for any automated or scripted work.
+
+**Only use interactive mode** when you need to inspect results and decide next steps dynamically — exploratory debugging where the next command depends on what you see.
+
+### Step 3: Interactive CDB Session
 
 When running CDB interactively (e.g., attached to a dump for exploratory debugging):
 
@@ -78,7 +84,7 @@ When running CDB interactively (e.g., attached to a dump for exploratory debuggi
 
 After this, SOS commands (`!clrstack`, `!dumpheap`, `!dumpobj`, etc.) will use the local build.
 
-### Step 3: Non-Interactive CDB (Quick Commands)
+### Step 4: Non-Interactive CDB (Quick Commands)
 
 When running CDB non-interactively to capture output of a single command:
 
@@ -92,14 +98,22 @@ If no local DAC is needed, omit the `.cordll` portion:
 <cdb> -z <dump_path> -c ".unload sos;.load <sos_path>;.chain;!<COMMAND>;qq"
 ```
 
+**Output handling:** CDB output is verbose — debugger gallery init, symbol path, module loads, etc. Pipe to a file and use `Select-String` to validate results rather than reading raw output:
+
+```powershell
+& <cdb> -z <dump> -c ".unload sos;.load <sos_path>;.chain;!clrstack;qq" | Out-File cdb_output.txt
+Select-String -Path cdb_output.txt -Pattern "sos\.dll" # verify .chain
+Select-String -Path cdb_output.txt -Pattern "!clrstack" # find command output
+```
+
 **After capturing output:**
 1. Parse the `.chain` output from the result.
 2. Verify our SOS is listed and is the **only** SOS loaded.
-3. If another SOS appears in `.chain`, **reject the output** — it may have used the wrong SOS. Fall back to interactive mode (Step 2) to manually unload the stale one.
+3. If another SOS appears in `.chain`, **reject the output** — it may have used the wrong SOS. Fall back to interactive mode (Step 3) to manually unload the stale one.
 
 `qq` quits CDB. Use `q` if you want CDB to terminate the target too (live debugging only — never with dumps).
 
-### Step 4: Verify SOS Version
+### Step 5: Verify SOS Version
 
 After loading, run `!soshelp` or check the `.chain` output path to confirm the loaded SOS matches the expected build path. This catches cases where `.load` silently loaded a cached version.
 
