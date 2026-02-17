@@ -34,12 +34,9 @@ Load all prior context for an issue and brief the developer for an interactive i
 
 ## Workflow
 
-### Step 0: Ensure Triage Repo Is Up to Date
+### Step 0: Bookkeeping
 
-If you have not already fetched and pulled the triage repo during this session, do so now:
-
-1. `git fetch` and `git pull` in the triage repo root (`D:\git\work`).
-2. If you have already done this earlier in the session (or remember doing so), skip this step.
+Invoke `rt-bookkeeping` to pull the triage repo and flush any pending `.progress/` from prior sessions.
 
 ### Step 1: Locate and Load Prior Work
 
@@ -112,6 +109,14 @@ Follow the developer's lead. When they ask you to do something, do it and report
 - If the developer asks you to fix something, create the fix branch in whichever repo the change belongs in — use the `related_repos` local paths.
 - If the developer asks you to run tests, run them in the repo where the code change was made.
 - When reporting findings, be explicit about which repo you're looking at so the developer maintains context.
+
+**Ongoing progress capture:** As you work, periodically append findings to a progress file:
+
+1. Create `issues/<owner>-<repo>/<issue_number>/.progress/` if it doesn't exist.
+2. At the start of the session, create a file named `<ISO-8601-timestamp>.md` (e.g., `2026-02-17T13-30-00Z.md`).
+3. Append to this file as you go — key findings, commands run, code read, conclusions reached. Write in the same style as a captain's log entry.
+4. **If your progress file disappears** (renamed by `rt-bookkeeping` flushing from another session), create a new one with a fresh timestamp and continue. The prior content was already captured.
+5. This file is gitignored and local-only. It exists as a safety net so that if the session ends without an explicit save, the next `rt-bookkeeping` run will flush it into `log.md`.
 
 ### Step 4: Update Reports (when the developer says they're done)
 

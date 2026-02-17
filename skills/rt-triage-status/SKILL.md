@@ -34,12 +34,9 @@ Query and display the current state of triage work across sprints and repos.
 
 ## Workflow
 
-### Step 0: Ensure Triage Repo Is Up to Date
+### Step 0: Bookkeeping
 
-If you have not already fetched and pulled the triage repo during this session, do so now:
-
-1. `git fetch` and `git pull` in the triage repo root (`D:\git\work`).
-2. If you have already done this earlier in the session (or remember doing so), skip this step.
+Invoke `rt-bookkeeping` to pull the triage repo and flush any pending `.progress/` from prior sessions.
 
 ### Step 1: Gather Data
 
