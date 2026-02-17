@@ -75,6 +75,7 @@ Using the results from Step 1:
 - Note that native leaks can be caused by managed code holding native resources (e.g., undisposed certificates, COM objects, SafeHandles).
 - Check for managed types that wrap native resources (certificates, streams, handles) using `dump_heap`.
 - `get_virtual_address_usage` is the primary tool for native memory investigation.
+- Use the debugger (cdb or lldb) to check for heap fragmenetation.
 
 **d) Mixed scenarios:**
 - Native and managed memory can be related. A managed object may pin or reference native memory.
