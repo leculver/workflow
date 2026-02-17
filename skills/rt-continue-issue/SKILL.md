@@ -33,6 +33,13 @@ Load all prior context for an issue and brief the developer for an interactive i
 
 ## Workflow
 
+### Step 0: Ensure Triage Repo Is Up to Date
+
+If you have not already fetched and pulled the triage repo during this session, do so now:
+
+1. `git fetch` and `git pull` in the triage repo root (`D:\git\work`).
+2. If you have already done this earlier in the session (or remember doing so), skip this step.
+
 ### Step 1: Locate and Load Prior Work
 
 Before doing anything else, gather ALL context:
