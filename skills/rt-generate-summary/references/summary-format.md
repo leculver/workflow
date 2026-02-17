@@ -42,11 +42,13 @@ The summary follows this exact section order:
 |----|--------|-------|---------------|
 | [#NNN](url) | author | title | [#N](url), ... |
 
-## Issues That Should Be Closed
+## Issues That Should Be Closed (N issues open, M already closed)
 
 | Issue | GitHub | Title | State | Open PR | Fix | 🔍 | Status | Summary |
 |-------|--------|-------|-------|---------|-----|-----|--------|---------|
 | [N](path) | [#N](url) | title | 🔵 Open | | | | status | reason |
+
+(Only list issues that are still open on GitHub. Omit already-closed issues.)
 
 ## <Area Name> (N issues)
 

@@ -63,6 +63,9 @@ If you have not already fetched and pulled the triage repo during this session, 
 
 **Section 1 — Should Be Closed:**
 Issues with status in: `already-fixed`, `already-implemented`, `by-design`, `stale`, `wont-fix`, `duplicate`.
+Count how many of these are still open vs already closed on GitHub. Display the header as:
+`## Issues That Should Be Closed (N issues open, M already closed)`
+Only list the **still-open** issues in the table. Omit already-closed issues from the display since they need no action.
 
 **Section 2 — By Area:**
 Everything else (not in Section 1, not docs), classified using the area rules from `config/repos.json`. Sort area subsections by issue count descending. Issues not matching any area go in "Other / General".
