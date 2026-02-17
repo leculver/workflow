@@ -79,17 +79,17 @@ For each linked issue, use `issue_read` (method: `get`) to determine its state. 
 | Item | State | Icon | Meaning |
 |------|-------|------|---------|
 | Issue | Open | 🟢 | Issue is open |
-| Issue | Closed as completed/fixed | ✅ | Issue closed as completed |
+| Issue | Closed as completed/fixed | ☑️ | Issue closed as completed |
 | Issue | Closed for other reason | ⚪ | Issue closed not-planned / won't fix / other |
 | PR | Open | 🟢 | PR is open |
-| PR | Merged | 🟣 | PR was merged |
+| PR | Merged | ☑️ | PR was merged |
 | PR | Closed without merge | ⛔ | PR closed without merging |
 
 Append the icon directly after the link text, inside the markdown link's display portion. Examples:
-- `[#42 ✅](https://github.com/owner/repo/issues/42)`
-- `[#123 🟣](https://github.com/owner/repo/pull/123)`
+- `[#42 ☑️](https://github.com/owner/repo/issues/42)`
+- `[#123 ☑️](https://github.com/owner/repo/pull/123)`
 
-To determine issue close reason: check the `state_reason` field from the GitHub API. If `state_reason` is `completed`, use ✅. If `state_reason` is `not_planned` or any other closed reason, use ⚪.
+To determine issue close reason: check the `state_reason` field from the GitHub API. If `state_reason` is `completed`, use ☑️. If `state_reason` is `not_planned` or any other closed reason, use ⚪.
 
 ### Step 5: Sort Results
 
@@ -113,7 +113,7 @@ Sort all PRs by **Created date** ascending (oldest first).
 
 | Timestamp | Repo | Issues Linked | PR# | PR Title |
 |-----------|------|---------------|-----|----------|
-| 2026-02-14 19:35 | owner/repo | [#42 ✅](https://github.com/owner/repo/issues/42), [owner2/repo2#99 🟢](https://github.com/owner2/repo2/issues/99) | [#123 🟣](https://github.com/owner/repo/pull/123) | Fix the thing |
+| 2026-02-14 19:35 | owner/repo | [#42 ☑️](https://github.com/owner/repo/issues/42), [owner2/repo2#99 🟢](https://github.com/owner2/repo2/issues/99) | [#123 ☑️](https://github.com/owner/repo/pull/123) | Fix the thing |
 
 Fetched at 2026-02-16 19:05 UTC. Covers 2026-02-02 to 2026-02-16.
 ```
@@ -129,7 +129,7 @@ After writing, display a summary: how many PRs were written (total and new), acr
 - [ ] Timestamp column shows `YYYY-MM-DD HH:MM` in UTC
 - [ ] Linked issues are markdown links: `[#N icon](url)` for same-repo, `[owner/repo#N icon](url)` for cross-repo
 - [ ] PR numbers are markdown links with status icon to the pull request page
-- [ ] Status icons are correct: 🟢 open, ✅ closed-completed, ⚪ closed-other for issues; 🟢 open, 🟣 merged, ⛔ closed-unmerged for PRs
+- [ ] Status icons are correct: 🟢 open, ☑️ closed-completed, ⚪ closed-other for issues; 🟢 open, ☑️ merged, ⛔ closed-unmerged for PRs
 - [ ] Self-references (PR# == issue#) are excluded from Issues Linked
 - [ ] Existing file rows are preserved; only new PRs are appended
 - [ ] Table renders correctly as markdown
