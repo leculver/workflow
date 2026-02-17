@@ -83,6 +83,7 @@ Analyze the issue and determine:
 3. **Staleness**: Is this issue current, outdated, or superseded?
 4. **Area**: Classify using the area rules from `config/repos.json`.
 5. **Platform requirements**: Which platforms are needed to reproduce/investigate?
+6. **Blocked**: If the issue is understood but depends on an external fix, unreleased package, or upstream change, set status to `blocked` with `blocked_reason` and optionally `blocked_url`. Blocked issues are deprioritized in summaries and scoring.
 
 For feature requests, check if the feature has already been implemented in the current codebase. Don't attempt to build features that already exist.
 

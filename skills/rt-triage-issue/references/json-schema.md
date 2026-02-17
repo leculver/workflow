@@ -22,6 +22,8 @@ The canonical schema is at `config/schemas/issue-report.schema.json` in the tria
     "category": "bug|feature-request|question|docs",
     "status": "<see triage-categories.md>",
     "status_reason": "<one sentence explanation>",
+    "blocked_reason": "<why blocked — only when status is 'blocked'>",
+    "blocked_url": "<url of blocking issue/PR/package, or null>",
     "affected_repo": "<repo short name or 'unknown'>",
     "requires_platform": ["any"],
     "staleness": "active|stale|superseded",

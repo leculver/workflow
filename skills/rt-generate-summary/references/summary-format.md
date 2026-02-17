@@ -8,8 +8,9 @@ The summary follows this exact section order:
 2. **Changes Since Last Summary** — What's new (only if a prior summary exists)
 3. **Open Pull Requests** — All open PRs with linked issues
 4. **Issues That Should Be Closed** — Stale, already-fixed, by-design, etc.
-5. **Area sections** — One section per area (e.g., SOS, dotnet-dump), sorted by issue count descending. Only issues NOT in the "should close" or "docs" sections.
-6. **Documentation Issues** — All docs issues in a single flat table (not split by area)
+5. **Blocked Issues** — Issues blocked on external dependencies, upstream fixes, or unreleased packages
+6. **Area sections** — One section per area (e.g., SOS, dotnet-dump), sorted by issue count descending. Only issues NOT in the "should close", "blocked", or "docs" sections.
+7. **Documentation Issues** — All docs issues in a single flat table (not split by area)
 
 ## Full Template
 
@@ -28,6 +29,7 @@ The summary follows this exact section order:
 | ✅ Have Fix Candidate | N |
 | 🔍 Manually Investigated | N |
 | Should Be Closed | N |
+| Blocked | N |
 | Documentation Issues | N |
 
 ## Changes Since Last Summary
@@ -49,6 +51,14 @@ The summary follows this exact section order:
 | [N](path) | [#N](url) | title | 🔵 Open | | | | status | reason |
 
 (Only list issues that are still open on GitHub. Omit already-closed issues.)
+
+## Blocked Issues (N issues)
+
+| Issue | GitHub | Title | State | Blocked On | Summary |
+|-------|--------|-------|-------|------------|---------|
+| [N](path) | [#N](url) | title | 🔵 Open | [reason](url) | summary |
+
+(Issues blocked on external dependencies, upstream fixes, or unreleased packages. Not actionable until the blocker resolves.)
 
 ## <Area Name> (N issues)
 

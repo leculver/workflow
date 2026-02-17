@@ -17,6 +17,7 @@
 | `not-reproduced` | Tried but couldn't trigger it |
 | `needs-info` | Can't reproduce, issue lacks detail |
 | `platform-blocked` | Requires a different OS to reproduce |
+| `blocked` | Issue is understood but blocked on an external dependency, upstream fix, or unreleased package. Use `blocked_reason` and `blocked_url` to explain what it's waiting on. |
 | `stale` | Issue is outdated or no longer applies |
 | `already-fixed` | The fix landed since the issue was filed |
 | `already-implemented` | Feature request already exists |

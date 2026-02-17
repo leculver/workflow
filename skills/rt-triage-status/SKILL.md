@@ -60,6 +60,7 @@ By status:
   not-reproduced:    N
   needs-info:        N
   platform-blocked:  N  (N windows, N linux, N macos)
+  blocked:           N  (external dependency, upstream fix, unreleased package)
   stale:             N
   already-fixed:     N
   already-implemented: N
@@ -101,6 +102,7 @@ If `filter` is provided, show matching issues:
 | `reproduced` | status == reproduced |
 | `not-reproduced` | status == not-reproduced |
 | `platform-blocked` | status == platform-blocked |
+| `blocked` | status == blocked (external dependency, upstream fix) |
 | `needs-attention` | status in (error, needs-info, platform-blocked) |
 | `has-fix` | fix.has_candidate == true |
 | `no-fix` | status == reproduced AND fix.has_candidate == false |
