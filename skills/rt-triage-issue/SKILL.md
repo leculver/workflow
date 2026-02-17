@@ -2,8 +2,10 @@
 name: rt-triage-issue
 description: >
   Core issue triage engine. Triages a single GitHub issue: fetches details, categorizes as bug/feature/docs/question,
-  attempts reproduction and fix, writes structured JSON report and markdown summary. Use when processing issues
-  from a sprint queue, or pass a specific issue number to triage on demand. Reads repo config from config/repos.json.
+  attempts reproduction and fix, writes structured JSON report and markdown summary. Use when the user says
+  "triage" or "work on" an issue. Use when processing issues from a sprint queue, or pass a specific issue
+  number to triage on demand. Do NOT use when the user says "load", "continue", or "pick up" an issue —
+  that is rt-load-issue. Reads repo config from config/repos.json.
 ---
 
 # Triage Issue
@@ -18,7 +20,7 @@ Triage a single GitHub issue end-to-end: fetch, categorize, reproduce, attempt f
 
 ## When Not to Use
 
-- Continuing deep investigation on a previously triaged issue (use `rt-continue-issue`)
+- Continuing deep investigation on a previously triaged issue (use `rt-load-issue`)
 - Batch processing multiple issues (use `rt-triage-loop`)
 - Reprocessing platform-blocked issues on a different OS (use `rt-platform-reprocess`)
 

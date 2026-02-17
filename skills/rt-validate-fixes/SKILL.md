@@ -19,7 +19,7 @@ Check the health and readiness of all fix candidates in the triage system.
 
 ## When Not to Use
 
-- Creating fixes (use `rt-triage-issue` or `rt-continue-issue`)
+- Creating fixes (use `rt-triage-issue` or `rt-load-issue`)
 - Triaging new issues (use `rt-triage-issue`)
 
 ## Inputs

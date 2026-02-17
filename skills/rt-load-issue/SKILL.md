@@ -1,10 +1,11 @@
 ---
-name: rt-continue-issue
+name: rt-load-issue
 description: >
-  Loads all prior context for a specific issue and presents a briefing to the developer. Reads the existing
-  JSON report, captain's log, reproduction artifacts, fix branches, and latest GitHub comments. Does NOT
-  autonomously investigate — instead primes the conversation so the developer can ask followups, try things,
-  and direct the investigation interactively. Use when you want to pick up where you left off on an issue.
+  Loads all prior context for a specific issue and presents a briefing to the developer. Use when the user
+  says "load", "continue", or "pick up" an issue. Reads the existing JSON report, captain's log, reproduction
+  artifacts, fix branches, and latest GitHub comments. Does NOT autonomously investigate — instead primes the
+  conversation so the developer can ask followups, try things, and direct the investigation interactively.
+  Do NOT use when the user says "triage" or "work on" an issue — that is rt-triage-issue.
 ---
 
 # Continue Issue
