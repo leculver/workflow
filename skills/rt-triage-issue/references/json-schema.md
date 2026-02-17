@@ -64,6 +64,7 @@ The canonical schema is at `config/schemas/issue-report.schema.json` in the tria
     "summary": "<fix description>",
     "confidence": <0.0-1.0>,
     "branch": "<branch name>",
+    "fix_repo": "<owner/repo where the branch was created, if different from the issue's repo>",
     "diff": "<unified diff or description>"
   }
 }

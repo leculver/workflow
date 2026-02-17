@@ -48,7 +48,8 @@ If you have not already fetched and pulled the triage repo during this session, 
 1. Read `config/repos.json` from the triage repo root.
 2. Find the entry for the requested `repo`.
 3. Load area classification rules, local paths, debugger paths, and dump env vars.
-4. If the repo is not configured, stop and tell the user to run `rt-add-repo` first.
+4. **Also load `related_repos`** — these are repos where the root cause or fix may live. Note their local checkout paths.
+5. If the repo is not configured, stop and tell the user to run `rt-add-repo` first.
 
 ### Step 2: Select the Issue
 
@@ -85,18 +86,21 @@ Analyze the issue and determine:
 5. **Platform requirements**: Which platforms are needed to reproduce/investigate?
 6. **Blocked**: If the issue is understood but depends on an external fix, unreleased package, or upstream change, set status to `blocked` with `blocked_reason` and optionally `blocked_url`. Blocked issues are deprioritized in summaries and scoring.
 7. **Actionability**: Derive from the fields above using the rules in [triage categories](references/triage-categories.md) (`triage.actionability` section). Do not set manually — compute it from status, fix candidate, and platform requirements.
+8. **Affected repo**: Determine where the root cause actually lives. An issue filed in `dotnet/diagnostics` may have its root cause in `dotnet/runtime` or `microsoft/perfview`. Set `affected_repo` to the repo where the bug or missing feature actually is — this drives where the fix is created. If the root cause spans multiple repos, set `affected_repo` to the primary one and note the others in `status_reason`.
 
-For feature requests, check if the feature has already been implemented in the current codebase. Don't attempt to build features that already exist.
+**Cross-repo investigation:** Do NOT limit analysis to the issue's repo. Follow the code across repo boundaries using the `related_repos` local paths loaded in Step 1. If a diagnostics issue calls into runtime or ClrMD code, read that code. If the stack trace points into another repo, investigate there. The issue's repo is where the bug was *reported*, not necessarily where it *lives*.
 
-For bugs, check if the bug has already been fixed since the issue was filed.
+For feature requests, check if the feature has already been implemented in the current codebase — including related repos.
+
+For bugs, check if the bug has already been fixed since the issue was filed — including in related repos.
 
 ### Step 6: Reproduce (unless skip_repro)
 
 Follow the [reproduction rules](references/reproduction-rules.md):
 
 1. Create `<workspace>/repros/issue_<NUMBER>/` if it doesn't exist.
-2. Ensure the source repo is on the main branch.
-3. Write a minimal repro (console app, unit test, or script).
+2. Ensure the source repo (and any related repos needed) are on their main branches.
+3. Write a minimal repro (console app, unit test, or script). The repro may reference or build against code from any of the local repo checkouts.
 4. Set dump capture environment variables from config.
 5. Run the repro and record all steps in the JSON.
 6. All dump files must use the `.dmp` extension (rename Linux core dumps if needed).
@@ -115,13 +119,14 @@ Do NOT attempt a fix if:
 - The fix would require major architectural changes or is highly speculative.
 
 When creating a fix:
-1. Create a branch `issue_<NUMBER>` in the appropriate repo.
-2. Make the fix, run targeted tests if possible.
-3. Record the fix details (summary, confidence, branch, diff) in the JSON.
-4. Set `fix.confidence` lower for fixes without reproduction (e.g., 0.4–0.6 vs. 0.8+ for reproduced fixes).
-5. Push the branch to `origin` (the user's fork), NOT `upstream`.
-6. Do NOT include `Co-authored-by: Copilot` in fix commit messages — these are proposed fixes authored by the developer.
-7. Return to the main branch when done.
+1. **Create the branch in the repo where the fix belongs**, not necessarily the issue's repo. Use `affected_repo` from Step 5 to determine this. For example, a `dotnet/diagnostics` issue whose root cause is in `dotnet/runtime` gets a fix branch in the runtime checkout. If the fix spans multiple repos, create branches in each.
+2. Branch name: `issue_<NUMBER>` (using the original issue number, even in a different repo).
+3. Make the fix, run targeted tests if possible.
+4. Record the fix details (summary, confidence, branch, diff) in the JSON. If the fix is in a different repo than the issue, note which repo the branch is in (e.g., `"branch": "issue_1837"`, `"fix_repo": "dotnet/runtime"`).
+5. Set `fix.confidence` lower for fixes without reproduction (e.g., 0.4–0.6 vs. 0.8+ for reproduced fixes).
+6. Push the branch to `origin` (the user's fork), NOT `upstream`. Do this for each repo where a branch was created.
+7. Do NOT include `Co-authored-by: Copilot` in fix commit messages — these are proposed fixes authored by the developer.
+8. Return all repos to their main branches when done.
 
 ### Step 8: Write Reports
 
@@ -169,7 +174,7 @@ When creating a fix:
 - [ ] `report.md` exists and has content
 - [ ] Session entry appended to `log.md`
 - [ ] Sprint queue was updated (issue removed) if processing from queue
-- [ ] Source repos are back on main branch
+- [ ] Source repos are back on main branch (all repos touched, not just the issue's repo)
 - [ ] Results committed to triage repo
 
 ## Common Pitfalls
@@ -178,6 +183,8 @@ When creating a fix:
 |---------|----------|
 | Repo not in config | Run `rt-add-repo` first |
 | No active sprint | Run `rt-sprint-setup` first |
-| Left source repo on wrong branch | Always `git checkout main` when done |
+| Left source repo on wrong branch | Always `git checkout main` in every repo touched when done |
 | Lost context from prior sessions | Append to `log.md`, never overwrite it |
 | Full test suite run | Only run targeted tests — full suite takes 50+ min |
+| Fix created in wrong repo | Use `affected_repo` to determine where the root cause is — the issue's repo is where it was reported, not necessarily where the fix belongs |
+| Investigation limited to one repo | Follow the code across repo boundaries using `related_repos` local paths — stack traces, function calls, and shared interfaces often cross repos |
