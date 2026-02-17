@@ -35,7 +35,6 @@ The summary follows this exact section order:
 ## Changes Since Last Summary
 
 - N new issues triaged
-- N issues changed status
 - N new fix candidates
 
 ## Open Pull Requests
