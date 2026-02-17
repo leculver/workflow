@@ -42,6 +42,16 @@ Call **all four** of these tools to get the baseline picture of the process:
 
 These four calls can be made in parallel since they are independent.
 
+**Handling tool timeouts:** On large dumps, some of these tools may time out. A timeout does **not** mean the request failed — the server is still processing. Use this retry strategy:
+
+1. Fire all four tools in parallel.
+2. If any tool times out, **do not retry immediately**. Continue analyzing the results from the tools that succeeded.
+3. After you have finished processing all successful results, retry the timed-out tool(s).
+4. If a tool times out a second time, wait **120 seconds**, then retry once more.
+5. If a tool times out a third time, give up on that tool. Note in your output which tool(s) failed and that the analysis is incomplete in that area.
+
+This means you may begin Step 2 with partial data and revisit your analysis once the retried tool(s) return.
+
 ### Step 2: Analyze for Hang Causes
 
 With the data from Step 1, look for these patterns (in priority order):
