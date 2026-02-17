@@ -45,7 +45,12 @@ If you have not already fetched and pulled the triage repo during this session, 
 
 Before doing anything else, gather ALL context:
 
-**a) Infer repo if not provided:**
+**a) Load configuration:**
+- Read `config/repos.json` from the triage repo root.
+- Find the entry for the issue's repo and load its `related_repos` with their local checkout paths.
+- These related repos are part of the investigation scope — the root cause or fix may live in any of them.
+
+**b) Infer repo if not provided:**
 - Search `issues/*/issue_number/report.json` across all repo directories in the triage repo.
 - If found in exactly one, use that repo. If ambiguous, ask the user.
 
@@ -69,28 +74,30 @@ Before doing anything else, gather ALL context:
 - Check committed repro source in `issues/<owner>-<repo>/<issue_number>/repro/` too.
 
 **g) Fix branches:**
-- Check if a branch named `issue_<issue_number>` exists in the source repo(s).
-- If so, review the diff against main to understand the candidate fix.
+- Check if a branch named `issue_<issue_number>` exists in the source repo **and all related repos** (from `related_repos` in config). The fix may have been created in a different repo than where the issue was filed.
+- If found, review the diff against main to understand the candidate fix.
+- Note which repo each fix branch is in — this is important context for the developer.
 
 **h) Open PRs:**
-- Check for open PRs referencing this issue.
+- Check for open PRs referencing this issue — in the issue's repo **and** related repos.
 
 ### Step 2: Present Briefing
 
 Present a clear, structured briefing to the developer. This is the **primary output** of this skill. Include:
 
 1. **Issue summary** — Title, category, link, key details from the body
-2. **Current triage status** — Status, staleness, affected repo, platforms
-3. **Investigation history** — What was attempted across all sessions (from log.md)
-4. **Reproduction status** — Was it reproduced? What repro artifacts exist? Where?
-5. **Fix status** — Is there a candidate fix? Branch name, confidence, what it changes
-6. **Open PRs** — Any PRs already addressing this issue
-7. **New activity** — Any GitHub comments or changes since the last session
-8. **Suggested next steps** — Based on current state, what are the logical things to try next
+2. **Current triage status** — Status, staleness, affected repo, platforms, actionability
+3. **Cross-repo context** — List the related repos and their local paths. If `affected_repo` differs from the issue's repo, highlight this — the root cause is elsewhere. Remind the developer (and yourself) that investigation and fixes should follow the code wherever it leads across these repos.
+4. **Investigation history** — What was attempted across all sessions (from log.md)
+5. **Reproduction status** — Was it reproduced? What repro artifacts exist? Where?
+6. **Fix status** — Is there a candidate fix? Which repo is the branch in? Branch name, confidence, what it changes
+7. **Open PRs** — Any PRs already addressing this issue (across all related repos)
+8. **New activity** — Any GitHub comments or changes since the last session
+9. **Suggested next steps** — Based on current state, what are the logical things to try next
 
-### Step 3: Wait for the Developer
+### Step 3: Interactive Investigation
 
-**STOP HERE.** Do not autonomously investigate, reproduce, or fix anything.
+**STOP after the briefing.** Do not autonomously investigate, reproduce, or fix anything.
 
 The developer is now in the driver's seat. Wait for them to:
 - Ask questions about the issue or prior work
@@ -99,6 +106,12 @@ The developer is now in the driver's seat. Wait for them to:
 - Ask you to run commands, read code, build repros, etc.
 
 Follow the developer's lead. When they ask you to do something, do it and report back. This is an interactive session, not an automated triage run.
+
+**Cross-repo scope:** When investigating or building fixes during this session, you have full access to all related repos loaded in Step 1. Do NOT confine yourself to the issue's repo:
+- If the developer asks you to look at code, follow it across repo boundaries. A diagnostics issue may need you to read runtime or ClrMD source.
+- If the developer asks you to fix something, create the fix branch in whichever repo the change belongs in — use the `related_repos` local paths.
+- If the developer asks you to run tests, run them in the repo where the code change was made.
+- When reporting findings, be explicit about which repo you're looking at so the developer maintains context.
 
 ### Step 4: Update Reports (when the developer says they're done)
 
@@ -128,7 +141,7 @@ Commit with message: `continue: <owner>/<repo>#<number> — <summary of new find
 - [ ] Developer was NOT preempted — no autonomous investigation
 - [ ] When saving: session entry appended to `log.md` (not overwriting prior entries)
 - [ ] When saving: `manually_investigated` set to `true`
-- [ ] Source repos back on main branch
+- [ ] Source repos back on main branch (all repos touched, not just the issue's repo)
 - [ ] Results committed to triage repo
 
 ## Common Pitfalls
@@ -140,3 +153,5 @@ Commit with message: `continue: <owner>/<repo>#<number> — <summary of new find
 | Can't find the repo | Provide `repo` explicitly if auto-detection fails |
 | Repro folder is huge | Don't re-read dumps — summarize what files exist |
 | Forgetting to save | Remind the developer to save progress before ending the session |
+| Investigation limited to one repo | Use `related_repos` local paths to follow code and build fixes across repo boundaries |
+| Fix branch in wrong repo | Check all related repos for existing branches; create new branches where the code change belongs |
