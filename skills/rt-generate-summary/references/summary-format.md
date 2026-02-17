@@ -46,17 +46,17 @@ The summary follows this exact section order:
 
 ## Issues That Should Be Closed (N issues open, M already closed)
 
-| Issue | GitHub | Title | State | Open PR | Fix | 🔍 | Status | Summary |
-|-------|--------|-------|-------|---------|-----|-----|--------|---------|
-| [N](path) | [#N](url) | title | 🔵 Open | | | | status | reason |
+| Issue | GitHub | Title | State | Act | Open PR | Fix | 🔍 | Status | Summary |
+|-------|--------|-------|-------|-----|---------|-----|-----|--------|---------|
+| [N](path) | [#N](url) | title | 🔵 Open | 🟡 | | | | status | reason |
 
 (Only list issues that are still open on GitHub. Omit already-closed issues.)
 
 ## Blocked Issues (N issues)
 
-| Issue | GitHub | Title | State | Blocked On | Summary |
-|-------|--------|-------|-------|------------|---------|
-| [N](path) | [#N](url) | title | 🔵 Open | [reason](url) | summary |
+| Issue | GitHub | Title | State | Act | Blocked On | Summary |
+|-------|--------|-------|-------|-----|------------|---------|
+| [N](path) | [#N](url) | title | 🔵 Open | ⚪ | [reason](url) | summary |
 
 (Issues blocked on external dependencies, upstream fixes, or unreleased packages. Not actionable until the blocker resolves.)
 

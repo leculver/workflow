@@ -78,7 +78,7 @@ Issues with category `docs` that are NOT in Section 1. Single combined table (no
 Use this table format for all sections:
 
 ```
-| Issue | GitHub | Title | State | Open PR | Fix | 🔍 | Status | Summary |
+| Issue | GitHub | Title | State | Act | Open PR | Fix | 🔍 | Status | Summary |
 ```
 
 Column details:
@@ -86,6 +86,7 @@ Column details:
 - **GitHub**: Link to the GitHub issue page
 - **Title**: Issue title (escape `|` as `&#124;`)
 - **State**: 🔵 Open / 🔴 Closed (use blue/red for colorblind accessibility)
+- **Act**: Actionability — 🔴 High / 🟡 Medium / ⚪ Low (derived from `triage.actionability`)
 - **Open PR**: Link to PR if one exists for this issue
 - **Fix**: ✅ if `fix.has_candidate` is true
 - **🔍**: 🔍 if `manually_investigated` is true

@@ -35,6 +35,28 @@
 | `stale` | Issue is outdated |
 | `superseded` | Replaced by another issue (set `superseded_by`) |
 
+## triage.actionability
+
+Derived from `status`, `fix.has_candidate`, and `requires_platform`. Do not set manually — compute it during triage.
+
+| Rating | Criteria |
+|--------|----------|
+| **High** 🔴 | `status=reproduced` AND `fix.has_candidate=true` |
+| **Medium** 🟡 | `status=reproduced` AND `fix.has_candidate=false` |
+| **Medium** 🟡 | `status=still-relevant` (feature request, unaddressed) |
+| **Medium** 🟡 | `status=not-reproduced` (worth retrying) |
+| **Medium** 🟡 | `status=platform-blocked` AND `requires_platform` includes `windows` or `linux` (we have these machines) |
+| **Low** ⚪ | `status=platform-blocked` AND `requires_platform` is only `macos`, `arm`, `arm64`, or other (we don't have these) |
+| **Low** ⚪ | `status=needs-info` |
+| **Low** ⚪ | `status=blocked` |
+| **Low** ⚪ | `status=stale` |
+| **Low** ⚪ | `status=already-fixed` |
+| **Low** ⚪ | `status=already-implemented` |
+| **Low** ⚪ | `status=by-design` |
+| **Low** ⚪ | `status=duplicate` |
+| **Low** ⚪ | `status=wont-fix` |
+| **Low** ⚪ | `status=error` |
+
 ## triage.requires_platform
 
 Array of one or more: `any`, `windows`, `linux`, `macos`

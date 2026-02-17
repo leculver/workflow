@@ -27,7 +27,8 @@ The canonical schema is at `config/schemas/issue-report.schema.json` in the tria
     "affected_repo": "<repo short name or 'unknown'>",
     "requires_platform": ["any"],
     "staleness": "active|stale|superseded",
-    "superseded_by": <int or null>
+    "superseded_by": <int or null>,
+    "actionability": "high|medium|low"
   },
   "environment": {
     "os": "<OS description>",

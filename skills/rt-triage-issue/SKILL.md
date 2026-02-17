@@ -84,6 +84,7 @@ Analyze the issue and determine:
 4. **Area**: Classify using the area rules from `config/repos.json`.
 5. **Platform requirements**: Which platforms are needed to reproduce/investigate?
 6. **Blocked**: If the issue is understood but depends on an external fix, unreleased package, or upstream change, set status to `blocked` with `blocked_reason` and optionally `blocked_url`. Blocked issues are deprioritized in summaries and scoring.
+7. **Actionability**: Derive from the fields above using the rules in [triage categories](references/triage-categories.md) (`triage.actionability` section). Do not set manually — compute it from status, fix candidate, and platform requirements.
 
 For feature requests, check if the feature has already been implemented in the current codebase. Don't attempt to build features that already exist.
 
