@@ -16,7 +16,8 @@ The canonical schema is at `config/schemas/issue-report.schema.json` in the tria
     "fetched_at_utc": "<ISO 8601>",
     "body_excerpt": "<max 500 chars>",
     "key_comments_excerpt": ["<comment>", ...],
-    "manually_investigated": <bool>
+    "manually_investigated": <bool>,
+    "assignees": ["<github username>", ...]
   },
   "triage": {
     "category": "bug|feature-request|question|docs",

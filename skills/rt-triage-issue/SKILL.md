@@ -62,9 +62,10 @@ Invoke `rt-bookkeeping` to pull the triage repo and flush any pending `.progress
 
 ### Step 3: Fetch Issue Details
 
-1. Use GitHub MCP tools to fetch the full issue: title, body, labels, all comments.
+1. Use GitHub MCP tools to fetch the full issue: title, body, labels, assignees, all comments.
 2. Check for open PRs that reference this issue.
 3. Record `fetched_at_utc` timestamp.
+4. Record `assignees` — the list of GitHub usernames assigned to the issue at fetch time.
 
 ### Step 4: Check Prior Work
 

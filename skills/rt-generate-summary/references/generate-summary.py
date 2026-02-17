@@ -109,6 +109,7 @@ def main():
             self.url = issue.get("url", f"https://github.com/{owner}/{repo_name}/issues/{self.number}")
             self.labels = issue.get("labels", [])
             self.manually_investigated = issue.get("manually_investigated", False)
+            self.assignees = issue.get("assignees", [])
 
             self.category = triage.get("category", "")
             self.status = triage.get("status", "")
@@ -133,6 +134,9 @@ def main():
                 return ""
             return ", ".join(f"[#{n}](https://github.com/{owner}/{repo_name}/pull/{n})" for n in self.prs)
 
+        def assignees_str(self):
+            return ", ".join(self.assignees) if self.assignees else ""
+
         def to_row(self):
             return (
                 f"| {self.report_link()} "
@@ -140,6 +144,7 @@ def main():
                 f"| {escape_pipe(self.title)} "
                 f"| {state_icon(self.state)} "
                 f"| {act_icon(self.actionability)} "
+                f"| {self.assignees_str()} "
                 f"| {self.pr_links()} "
                 f'| {"✅" if self.has_fix else ""} '
                 f'| {"🔍" if self.manually_investigated else ""} '
@@ -155,6 +160,7 @@ def main():
                 f"| {escape_pipe(self.title)} "
                 f"| {state_icon(self.state)} "
                 f"| {act_icon(self.actionability)} "
+                f"| {self.assignees_str()} "
                 f"| {escape_pipe(truncate(blocked_on))} "
                 f"| {escape_pipe(truncate(self.status_reason))} |"
             )
@@ -202,10 +208,10 @@ def main():
     new_issues = current_numbers - prev_issues
 
     # Build markdown
-    TABLE_HEADER = "| Issue | GitHub | Title | State | Act | Open PR | Fix | 🔍 | Status | Summary |"
-    TABLE_SEP = "|-------|--------|-------|-------|-----|---------|-----|-----|--------|---------|"
-    BLOCKED_HEADER = "| Issue | GitHub | Title | State | Act | Blocked On | Summary |"
-    BLOCKED_SEP = "|-------|--------|-------|-------|-----|------------|---------|"
+    TABLE_HEADER = "| Issue | GitHub | Title | State | Act | Assignees | Open PR | Fix | 🔍 | Status | Summary |"
+    TABLE_SEP = "|-------|--------|-------|-------|-----|-----------|---------|-----|-----|--------|---------|"
+    BLOCKED_HEADER = "| Issue | GitHub | Title | State | Act | Assignees | Blocked On | Summary |"
+    BLOCKED_SEP = "|-------|--------|-------|-------|-----|-----------|------------|---------|"
 
     lines = [
         f"# {full_repo} Issues Summary",

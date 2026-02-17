@@ -61,7 +61,7 @@ Invoke `rt-bookkeeping` to pull the triage repo and flush any pending `.progress
 1. Glob for `issues/<owner>-<repo>/*/report.json` in the triage repo.
 2. **Use a single Python script to process all reports** — do NOT loop over JSON files in PowerShell (it's too slow for hundreds of files).
 3. For each report, extract:
-   - `issue.number`, `issue.title`, `issue.state`, `issue.url`, `issue.labels`
+   - `issue.number`, `issue.title`, `issue.state`, `issue.url`, `issue.labels`, `issue.assignees`
    - `issue.manually_investigated`
    - `triage.category`, `triage.status`, `triage.status_reason`, `triage.affected_repo`
    - `triage.staleness`, `triage.requires_platform`
@@ -100,7 +100,7 @@ Issues with category `docs` that are NOT in Section 1. Single combined table (no
 Use this table format for all sections:
 
 ```
-| Issue | GitHub | Title | State | Act | Open PR | Fix | 🔍 | Status | Summary |
+| Issue | GitHub | Title | State | Act | Assignees | Open PR | Fix | 🔍 | Status | Summary |
 ```
 
 Column details:
@@ -109,6 +109,7 @@ Column details:
 - **Title**: Issue title (escape `|` as `&#124;`)
 - **State**: 🔵 Open / 🔴 Closed (use blue/red for colorblind accessibility)
 - **Act**: Actionability — 🔴 High / 🟡 Medium / ⚪ Low (derived from `triage.actionability`)
+- **Assignees**: Comma-separated GitHub usernames from `issue.assignees`
 - **Open PR**: Link to PR if one exists for this issue
 - **Fix**: ✅ if `fix.has_candidate` is true
 - **🔍**: 🔍 if `manually_investigated` is true
