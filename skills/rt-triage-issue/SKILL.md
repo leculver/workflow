@@ -46,7 +46,8 @@ Invoke `rt-bookkeeping` to pull the triage repo and flush any pending `.progress
 2. Find the entry for the requested `repo`.
 3. Load area classification rules, local paths, debugger paths, and dump env vars.
 4. **Also load `related_repos`** — these are repos where the root cause or fix may live. Note their local checkout paths.
-5. If the repo is not configured, stop and tell the user to run `rt-add-repo` first.
+5. **Load local tools** — read `config/local-tools.json` via `rt-local-tools` (action: `list`). This puts tool paths in context so you don't need to search for them during reproduction or fix attempts.
+6. If the repo is not configured, stop and tell the user to run `rt-add-repo` first.
 
 ### Step 2: Select the Issue
 
