@@ -21,7 +21,7 @@ Triage a single GitHub issue end-to-end: fetch, categorize, reproduce, attempt f
 ## When Not to Use
 
 - Continuing deep investigation on a previously triaged issue (use `load-issue`)
-- Batch processing multiple issues (use `triage-loop`)
+- Batch processing multiple issues (just run `triage-issue` repeatedly)
 
 ## Inputs
 

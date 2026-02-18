@@ -20,7 +20,7 @@ Discover open issues that have no triage report yet.
 
 ## When Not to Use
 
-- Building a sprint queue (use `triage-loop` to process multiple issues)
+- Batch processing (run `triage-issue` repeatedly for multiple issues)
 - Checking status of already-triaged issues (use `triage-status`)
 
 ## Inputs
@@ -75,7 +75,7 @@ If the user asks for all, show the full list.
 
 Based on the results, suggest:
 - If few untriaged: "Run `triage-issue` on #NNNN to triage it"
-- If many untriaged: "Run `triage-loop` to process multiple issues"
+- If many untriaged: "Run `triage-issue` on each, or pick a subset to start with"
 - If zero untriaged: "All caught up! 🎉"
 
 ## Validation

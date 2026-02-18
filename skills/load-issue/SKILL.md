@@ -21,7 +21,7 @@ Load all prior context for an issue and brief the developer for an interactive i
 ## When Not to Use
 
 - First-time triage of an issue (use `triage-issue`)
-- Batch processing (use `triage-loop`)
+- Batch processing (run `triage-issue` repeatedly)
 - Fully automated re-investigation (use `triage-issue` with the issue number)
 
 ## Inputs
