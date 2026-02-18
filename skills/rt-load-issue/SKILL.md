@@ -76,6 +76,13 @@ Before doing anything else, gather ALL context:
 - If found, review the diff against main to understand the candidate fix.
 - Note which repo each fix branch is in — this is important context for the developer.
 
+**h) Check out fix branches:**
+- If a fix branch was found in Step 1g, **check it out** in the appropriate repo so the developer starts on the fix code.
+- Use `fix_repo` from `report.json` (if set) to determine which repo checkout to switch. If `fix_repo` is empty, use the issue's own repo checkout.
+- If fix branches exist in **multiple** related repos, check them all out.
+- This lets the developer immediately see, build, and test the fix without manual branch switching.
+- Record which repos were switched so they can be restored to main in Step 5.
+
 **h) Open PRs:**
 - Check for open PRs referencing this issue — in the issue's repo **and** related repos.
 
@@ -88,7 +95,7 @@ Present a clear, structured briefing to the developer. This is the **primary out
 3. **Cross-repo context** — List the related repos and their local paths. If `affected_repo` differs from the issue's repo, highlight this — the root cause is elsewhere. Remind the developer (and yourself) that investigation and fixes should follow the code wherever it leads across these repos.
 4. **Investigation history** — What was attempted across all sessions (from log.md)
 5. **Reproduction status** — Was it reproduced? What repro artifacts exist? Where?
-6. **Fix status** — Is there a candidate fix? Which repo is the branch in? Branch name, confidence, what it changes
+6. **Fix status** — Is there a candidate fix? Which repo is the branch in? Branch name, confidence, what it changes. Note that the fix branch has been checked out and is ready to build/test.
 7. **Open PRs** — Any PRs already addressing this issue (across all related repos)
 8. **New activity** — Any GitHub comments or changes since the last session
 9. **Suggested next steps** — Based on current state, what are the logical things to try next
