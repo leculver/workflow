@@ -19,7 +19,7 @@ Configure a new repository for the issue triage system.
 ## When Not to Use
 
 - The repo is already configured (edit `config/repos.json` directly instead)
-- Running triage (use `rt-sprint-setup` then `rt-triage-issue`)
+- Running triage (use `rt-find-untriaged` then `rt-triage-issue`)
 
 ## Inputs
 

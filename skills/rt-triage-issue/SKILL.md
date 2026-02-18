@@ -22,7 +22,6 @@ Triage a single GitHub issue end-to-end: fetch, categorize, reproduce, attempt f
 
 - Continuing deep investigation on a previously triaged issue (use `rt-load-issue`)
 - Batch processing multiple issues (use `rt-triage-loop`)
-- Reprocessing platform-blocked issues on a different OS (use `rt-platform-reprocess`)
 
 ## Inputs
 
@@ -58,7 +57,7 @@ Invoke `rt-bookkeeping` to pull the triage repo and flush any pending `.progress
 1. Look for an active sprint run in `runs/` for this repo and platform.
 2. Find the most recent `run.json` where `status` is `in-progress`.
 3. Read its `queue` array and pick the last entry (pop from end).
-4. If no active sprint or empty queue, tell the user to run `rt-sprint-setup` first.
+4. If no active sprint or empty queue, tell the user to run `rt-find-untriaged` to discover untriaged issues, or provide an issue number directly.
 5. Update the run's queue (remove the selected issue) and save.
 
 ### Step 3: Fetch Issue Details
@@ -72,8 +71,14 @@ Invoke `rt-bookkeeping` to pull the triage repo and flush any pending `.progress
 
 1. Check if `issues/<owner>-<repo>/<issue_number>/report.json` exists.
 2. If it does, read it — this issue was previously triaged.
-3. Check if `repros/issue_<issue_number>/` exists in the workspace.
-4. Summarize what's known before proceeding.
+3. **Platform reprocess check:** If the prior report has `triage.status == "platform-blocked"` and `triage.requires_platform` matches the current OS, this is a platform reprocess. In this case:
+   - Preserve all prior observations — append new findings, don't replace prior work.
+   - Prefix new reproduction steps with `[<current platform> pass]` to distinguish from prior platform attempts.
+   - Proceed to reproduction (Step 6) even though the issue was previously triaged — the point is to retry on the correct platform.
+   - If reproduction succeeds, update status from `platform-blocked` to `reproduced` (or the appropriate new status).
+   - If still blocked (e.g., needs macOS and we're on Linux), keep `platform-blocked` but update `requires_platform` to reflect only the remaining platforms.
+4. Check if `repros/issue_<issue_number>/` exists in the workspace.
+5. Summarize what's known before proceeding.
 
 ### Step 5: Triage
 
@@ -185,7 +190,7 @@ When creating a fix:
 | Pitfall | Solution |
 |---------|----------|
 | Repo not in config | Run `rt-add-repo` first |
-| No active sprint | Run `rt-sprint-setup` first |
+| No active sprint | Run `rt-find-untriaged` to discover untriaged issues |
 | Left source repo on wrong branch | Always `git checkout main` in every repo touched when done |
 | Lost context from prior sessions | Append to `log.md`, never overwrite it |
 | Full test suite run | Only run targeted tests — full suite takes 50+ min |

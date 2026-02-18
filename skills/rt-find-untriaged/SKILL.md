@@ -13,14 +13,14 @@ Discover open issues that have no triage report yet.
 
 ## When to Use
 
-- Before `rt-sprint-setup`, to see what's out there
+- Before triaging, to see what's out there
 - After a triage sprint, to check for stragglers
 - Periodic check: "what haven't we looked at?"
 - Quick answer to "how many untriaged issues are there?"
 
 ## When Not to Use
 
-- Building a sprint queue (use `rt-sprint-setup` — it does its own cross-referencing)
+- Building a sprint queue (use `rt-triage-loop` to process multiple issues)
 - Checking status of already-triaged issues (use `rt-triage-status`)
 
 ## Inputs
@@ -75,7 +75,7 @@ If the user asks for all, show the full list.
 
 Based on the results, suggest:
 - If few untriaged: "Run `rt-triage-issue` on #NNNN to triage it"
-- If many untriaged: "Run `rt-sprint-setup --repo owner/repo` to create a sprint queue"
+- If many untriaged: "Run `rt-triage-loop` to process multiple issues"
 - If zero untriaged: "All caught up! 🎉"
 
 ## Validation

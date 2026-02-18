@@ -19,7 +19,7 @@ Run the issue triage loop: process issues from the sprint queue one at a time un
 ## When Not to Use
 
 - Triaging a single specific issue (use `rt-triage-issue`)
-- Setting up the sprint (use `rt-sprint-setup` first)
+- Setting up triage (use `rt-find-untriaged` to discover issues first)
 
 ## Inputs
 
@@ -41,7 +41,7 @@ Invoke `rt-bookkeeping` to pull the triage repo and flush any pending `.progress
 
 1. Read `config/repos.json` to validate the repo.
 2. Scan `runs/` for the most recent `in-progress` sprint for this repo.
-3. If none found, tell the user to run `rt-sprint-setup` first.
+3. If none found, tell the user to run `rt-find-untriaged` to discover issues first.
 4. Read the sprint's `run.json` and check the queue.
 
 ### Step 2a: Generate Script (if generate_script is true)
@@ -123,7 +123,7 @@ Next: "continue the triage loop" or "generate the summary"
 
 | Pitfall | Solution |
 |---------|----------|
-| No active sprint | Run `rt-sprint-setup` first |
+| No active sprint | Run `rt-find-untriaged` to discover issues first |
 | Script has wrong paths | Always use absolute paths in generated scripts |
 | Copilot crashes mid-loop | The sentinel file pattern ensures restart picks up where it left off |
 | Timeout not honored | Check elapsed time after each issue, not during |
