@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
-"""Find open GitHub issues that haven't been triaged yet."""
+"""Find open GitHub issues that haven't been triaged yet.
 
-import argparse, json, os, shutil, subprocess, sys
+Outputs a concise summary to stdout and writes full JSON data to a temp file.
+"""
+
+import argparse, json, os, shutil, subprocess, sys, tempfile
 
 
 def get_open_issues(owner, repo):
@@ -38,11 +41,30 @@ def get_triaged_issues(issues_dir, dir_name):
     return triaged
 
 
+def print_summary(results, show_max=10):
+    """Print a concise human-readable summary to stdout."""
+    total = sum(r["untriaged_count"] for r in results)
+    print(f"Untriaged Issues: {total}")
+    print("=" * 40)
+    for r in results:
+        print(f"\n{r['repo']}: {r['untriaged_count']} untriaged  "
+              f"({r['open_count']} open, {r['triaged_count']} triaged)")
+        shown = r["untriaged"][:show_max]
+        for i in shown:
+            date = i["created_at"][:10]
+            title = i["title"][:60]
+            print(f"  #{i['number']:<6} {title:<60} {date}")
+        remaining = len(r["untriaged"]) - len(shown)
+        if remaining > 0:
+            print(f"  ... ({remaining} more, see JSON output)")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Find open GitHub issues that haven't been triaged yet.")
     parser.add_argument("--repo", help="owner/repo to check (default: all)")
     parser.add_argument("--config", default="config/repos.json")
     parser.add_argument("--issues-dir", default="issues")
+    parser.add_argument("--show", type=int, default=10, help="Max issues to show per repo (default: 10)")
     args = parser.parse_args()
 
     with open(args.config) as f:
@@ -76,11 +98,19 @@ def main():
             "untriaged_count": len(untriaged)
         })
 
+    # Write full JSON to temp file
     output = {
         "repos": results,
         "total_untriaged": sum(r["untriaged_count"] for r in results)
     }
-    json.dump(output, sys.stdout, indent=2)
+    tmp = tempfile.NamedTemporaryFile(mode="w", suffix=".json", prefix="untriaged-",
+                                      delete=False, encoding="utf-8")
+    json.dump(output, tmp, indent=2)
+    tmp.close()
+
+    # Print concise summary to stdout
+    print_summary(results, show_max=args.show)
+    print(f"\nFull data: {tmp.name}")
 
 
 if __name__ == "__main__":

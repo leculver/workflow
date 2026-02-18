@@ -36,14 +36,17 @@ Discover open issues that have no triage report yet.
 Run the Python script that does the actual work:
 
 ```
-python .agents/skills/rt-find-untriaged/find_untriaged.py [--repo owner/repo]
+python .agents/skills/rt-find-untriaged/find_untriaged.py [--repo owner/repo] [--show N]
 ```
 
 The script:
 1. Reads `config/repos.json` for the repo list
 2. Calls `gh api --paginate` to get all open issues per repo
 3. Scans `issues/<owner>-<repo>/*/report.json` for triaged issues
-4. Outputs JSON with the set difference
+4. Prints a concise summary to stdout (10 newest untriaged per repo by default)
+5. Writes full JSON data to a temp file (path printed at the end)
+
+If you need the full issue list (e.g., for a repo with many untriaged), read the temp JSON file.
 
 ### Step 2: Present Results
 
