@@ -120,6 +120,8 @@ Follow the developer's lead. When they ask you to do something, do it and report
 - If the developer asks you to run tests, run them in the repo where the code change was made.
 - When reporting findings, be explicit about which repo you're looking at so the developer maintains context.
 
+**Code changes:** When writing or modifying source code (including comments in code), use only standard US keyboard ASCII characters. No em-dashes, smart quotes, or other Unicode punctuation in code. Use `--` instead of `—`, straight quotes instead of curly quotes, etc. This restriction applies only to code changes, not to markdown reports or log entries.
+
 **Ongoing progress capture:** As you work, periodically append findings to a progress file:
 
 1. Create `issues/<owner>-<repo>/<issue_number>/.progress/` if it doesn't exist.
