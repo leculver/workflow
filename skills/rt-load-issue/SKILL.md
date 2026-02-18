@@ -84,8 +84,9 @@ Before doing anything else, gather ALL context:
 - This lets the developer immediately see, build, and test the fix without manual branch switching.
 - Record which repos were switched so they can be restored to main in Step 5.
 
-**h) Open PRs:**
+**i) Open PRs:**
 - Check for open PRs referencing this issue — in the issue's repo **and** related repos.
+- **Track which fix branches have open PRs** — this controls push behavior later (see Step 5).
 
 ### Step 2: Present Briefing
 
@@ -147,7 +148,14 @@ When the developer indicates the session is over (or asks you to save progress):
 
 ### Step 5: Commit
 
+**Triage repo:** Commit and push triage repo changes (report.json, report.md, log.md) as usual.
+
 Commit with message: `continue: <owner>/<repo>#<number> — <summary of new findings>`
+
+**Fix branches:** Commit fix branch changes locally, but **do NOT push fix branches that have an open PR** unless the developer explicitly asks (e.g., "push it", "update the PR"). Pushing to a branch with an open PR triggers notifications and review activity — the developer should control when that happens.
+
+- If the fix branch has **no open PR**: push to `origin` automatically.
+- If the fix branch has **an open PR**: commit locally only. Mention in the briefing or when saving that the branch has unpushed commits and the developer can say "push" when ready.
 
 Do NOT include `Co-authored-by: Copilot` in commit messages.
 
