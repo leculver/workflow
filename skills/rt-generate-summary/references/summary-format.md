@@ -6,11 +6,11 @@ The summary follows this exact section order:
 
 1. **Overview** — Stats table with counts
 2. **Changes Since Last Summary** — What's new (only if a prior summary exists)
-3. **Open Pull Requests** — All open PRs with linked issues
-4. **Issues That Should Be Closed** — Stale, already-fixed, by-design, etc.
-5. **Blocked Issues** — Issues blocked on external dependencies, upstream fixes, or unreleased packages
-6. **Area sections** — One section per area (e.g., SOS, dotnet-dump), sorted by issue count descending. Only issues NOT in the "should close", "blocked", or "docs" sections.
-7. **Documentation Issues** — All docs issues in a single flat table (not split by area)
+3. **Open Pull Requests** — Open PRs authored by leculver with linked issues
+4. **Blocked Issues** — Issues blocked on external dependencies, upstream fixes, or unreleased packages
+5. **Area sections** — One section per area (e.g., SOS, dotnet-dump), sorted by issue count descending. Only issues NOT in the "should close", "blocked", or "docs" sections.
+6. **Documentation Issues** — All docs issues in a single flat table (not split by area)
+7. **Issues That Should Be Closed** — Stale, already-fixed, by-design, etc. (at the end since they need the least attention)
 
 ## Full Template
 
@@ -39,17 +39,11 @@ The summary follows this exact section order:
 
 ## Open Pull Requests
 
+Only include PRs authored by leculver.
+
 | PR | Author | Title | Linked Issues |
 |----|--------|-------|---------------|
-| [#NNN](url) | author | title | [#N](url), ... |
-
-## Issues That Should Be Closed (N issues open, M already closed)
-
-| Issue | GitHub | Title | State | Act | Assignees | Open PR | Fix | 🔍 | Status | Summary |
-|-------|--------|-------|-------|-----|-----------|---------|-----|-----|--------|---------|
-| [N](path) | [#N](url) | title | 🔵 Open | 🟡 | user1, user2 | | | | status | reason |
-
-(Only list issues that are still open on GitHub. Omit already-closed issues.)
+| [#NNN](url) | leculver | title | [#N](url), ... |
 
 ## Blocked Issues (N issues)
 
@@ -66,6 +60,14 @@ The summary follows this exact section order:
 ## Documentation Issues
 
 (same table format, single combined section — not split by area)
+
+## Issues That Should Be Closed (N issues open, M already closed)
+
+| Issue | GitHub | Title | State | Act | Assignees | Open PR | Fix | 🔍 | Status | Summary |
+|-------|--------|-------|-------|-----|-----------|---------|-----|-----|--------|---------|
+| [N](path) | [#N](url) | title | 🔵 Open | 🟡 | user1, user2 | | | | status | reason |
+
+(Only list issues that are still open on GitHub. Omit already-closed issues.)
 ```
 
 ## Table Rules

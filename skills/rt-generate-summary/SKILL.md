@@ -71,7 +71,7 @@ Invoke `rt-bookkeeping` to pull the triage repo and flush any pending `.progress
 
 ### Step 3: Fetch Open PRs
 
-1. Use GitHub MCP tools: `list_pull_requests` for the repo, state=open, perPage=100.
+1. Use GitHub MCP tools: `search_pull_requests` for the repo, state=open, author=leculver, perPage=100.
 2. Extract PR number, title, author, html_url.
 3. Parse PR bodies AND titles for linked issues using ALL these patterns:
    - `fixes #N`, `closes #N`, `resolves #N` (case-insensitive)
@@ -83,17 +83,17 @@ Invoke `rt-bookkeeping` to pull the triage repo and flush any pending `.progress
 
 ### Step 4: Categorize Issues into Sections
 
-**Section 1 — Should Be Closed:**
+**Section 1 — By Area:**
+Everything not in "should close", "blocked", or "docs" sections, classified using the area rules from `config/repos.json`. Sort area subsections by issue count descending. Issues not matching any area go in "Other / General".
+
+**Section 2 — Documentation Issues:**
+Issues with category `docs` that are NOT in the "should close" section. Single combined table (not split by area).
+
+**Section 3 — Should Be Closed (at the end of the file):**
 Issues with status in: `already-fixed`, `already-implemented`, `by-design`, `stale`, `wont-fix`, `duplicate`.
 Count how many of these are still open vs already closed on GitHub. Display the header as:
 `## Issues That Should Be Closed (N issues open, M already closed)`
 Only list the **still-open** issues in the table. Omit already-closed issues from the display since they need no action.
-
-**Section 2 — By Area:**
-Everything else (not in Section 1, not docs), classified using the area rules from `config/repos.json`. Sort area subsections by issue count descending. Issues not matching any area go in "Other / General".
-
-**Section 3 — Documentation Issues:**
-Issues with category `docs` that are NOT in Section 1. Single combined table (not split by area).
 
 ### Step 5: Generate Markdown
 
@@ -119,7 +119,7 @@ Column details:
 Include before the issue sections (in this order):
 1. **Overview stats table**: Total issues, open/closed counts, fix candidates, manually investigated, by-status breakdown.
 2. **Changes Since Last Summary**: What's new since the prior summary (only if a prior summary exists). See Step 5.
-3. **Open Pull Requests table**: All open PRs with linked issues.
+3. **Open Pull Requests table**: Open PRs authored by leculver with linked issues.
 
 See [summary format reference](references/summary-format.md) for the full template.
 

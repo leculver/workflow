@@ -51,7 +51,8 @@ def main():
         config = json.load(f)
     areas_config = config["repos"][full_repo].get("areas", {})
 
-    # Build PR -> issue map
+    # Build PR -> issue map (only include PRs from leculver)
+    prs = [pr for pr in prs if pr.get("author", "").lower() == "leculver"]
     issue_to_prs = {}
     for pr in prs:
         for iss in pr.get("linked_issues", []):
@@ -255,17 +256,6 @@ def main():
     else:
         lines += ["No open pull requests.", ""]
 
-    # Should Be Closed
-    lines.append(f"## Issues That Should Be Closed ({len(should_close_open)} issues open, {len(should_close_closed)} already closed)")
-    lines.append("")
-    if should_close_open:
-        lines += [TABLE_HEADER, TABLE_SEP]
-        for i in sorted(should_close_open, key=lambda x: x.number):
-            lines.append(i.to_row())
-        lines.append("")
-    else:
-        lines += ["No open issues that should be closed.", ""]
-
     # Blocked
     lines.append(f"## Blocked Issues ({len(blocked)} issues)")
     lines.append("")
@@ -294,6 +284,17 @@ def main():
         lines.append("")
     else:
         lines += ["No documentation issues.", ""]
+
+    # Should Be Closed (at the end)
+    lines.append(f"## Issues That Should Be Closed ({len(should_close_open)} issues open, {len(should_close_closed)} already closed)")
+    lines.append("")
+    if should_close_open:
+        lines += [TABLE_HEADER, TABLE_SEP]
+        for i in sorted(should_close_open, key=lambda x: x.number):
+            lines.append(i.to_row())
+        lines.append("")
+    else:
+        lines += ["No open issues that should be closed.", ""]
 
     # Write
     os.makedirs(summary_dir, exist_ok=True)
