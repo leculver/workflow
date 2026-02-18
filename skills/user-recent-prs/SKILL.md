@@ -19,7 +19,7 @@ Query GitHub for the authenticated user's recent pull requests and produce a mar
 ## When Not to Use
 
 - Searching for PRs by other authors (use GitHub search tools directly)
-- Triaging or investigating issues (use `rt-triage-issue`)
+- Triaging or investigating issues (use `triage-issue`)
 
 ## Inputs
 
@@ -33,7 +33,7 @@ Query GitHub for the authenticated user's recent pull requests and produce a mar
 
 ### Step 0: Bookkeeping
 
-Invoke `rt-bookkeeping` to pull the triage repo and flush any pending `.progress/` from prior sessions.
+Invoke `bookkeeping` to pull the triage repo and flush any pending `.progress/` from prior sessions.
 
 ### Step 1: Resolve the GitHub Username
 

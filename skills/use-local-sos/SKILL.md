@@ -50,7 +50,7 @@ Before using this skill, verify the SOS DLL exists at the expected path. If it d
 
 ### Step 0: Resolve Tools
 
-Use `rt-local-tools` to resolve the `cdb` path.
+Use `local-tools` to resolve the `cdb` path.
 
 ### Step 1: Determine SOS Path
 

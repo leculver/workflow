@@ -1,10 +1,10 @@
 ---
-name: rt-save-ad-hoc
+name: save-ad-hoc
 description: >
   Saves an ad-hoc investigation note from the current conversation to the notes/ directory. Use when the
   user says "save this as a note", "save note", or "note this". Captures only the relevant recent topic
   from the conversation, not prior unrelated context. Does NOT save issue-specific findings — those belong
-  in the issue's report.json/report.md via rt-triage-issue or rt-load-issue.
+  in the issue's report.json/report.md via triage-issue or load-issue.
 ---
 
 # Save Ad-Hoc Note
@@ -19,8 +19,8 @@ Distill the relevant portion of the current conversation into a concise markdown
 
 ## When Not to Use
 
-- Findings about a specific issue being triaged (those go in the issue's report via `rt-triage-issue` or `rt-load-issue`)
-- Generating a summary dashboard (use `rt-generate-summary`)
+- Findings about a specific issue being triaged (those go in the issue's report via `triage-issue` or `load-issue`)
+- Generating a summary dashboard (use `generate-summary`)
 - Tracking PR activity (use `user-recent-prs`)
 
 ## Inputs
@@ -34,7 +34,7 @@ Distill the relevant portion of the current conversation into a concise markdown
 
 ### Step 0: Bookkeeping
 
-Invoke `rt-bookkeeping` to pull the triage repo and flush any pending `.progress/` from prior sessions.
+Invoke `bookkeeping` to pull the triage repo and flush any pending `.progress/` from prior sessions.
 
 ### Step 1: Identify What to Capture
 

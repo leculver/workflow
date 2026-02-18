@@ -1,5 +1,5 @@
 ---
-name: rt-add-repo
+name: add-repo
 description: >
   Adds a new repository to the triage system configuration. Prompts for repo details, local checkout paths,
   area classification rules, and scope filters. Writes the config entry and creates directory structure.
@@ -19,7 +19,7 @@ Configure a new repository for the issue triage system.
 ## When Not to Use
 
 - The repo is already configured (edit `config/repos.json` directly instead)
-- Running triage (use `rt-find-untriaged` then `rt-triage-issue`)
+- Running triage (use `find-untriaged` then `triage-issue`)
 
 ## Inputs
 
@@ -39,7 +39,7 @@ Configure a new repository for the issue triage system.
 
 ### Step 0: Bookkeeping
 
-Invoke `rt-bookkeeping` to pull the triage repo and flush any pending `.progress/` from prior sessions.
+Invoke `bookkeeping` to pull the triage repo and flush any pending `.progress/` from prior sessions.
 
 ### Step 1: Validate Inputs
 

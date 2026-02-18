@@ -73,7 +73,7 @@ The canonical schema is at `config/schemas/issue-report.schema.json` in the tria
 
 ## Writing Rules
 
-- `manually_investigated` is always `false` unless set by `rt-load-issue`. Only that skill sets it to `true` — all other automated skills leave it as `false` or preserve the existing value.
+- `manually_investigated` is always `false` unless set by `load-issue`. Only that skill sets it to `true` — all other automated skills leave it as `false` or preserve the existing value.
 - Write atomically: write to `.json.tmp` then rename to `.json`.
 - `affected_repo` should match a key in `config/repos.json` `related_repos` or the main repo name.
 - `reproduction.artifacts` should list paths to repro source and scripts (committed), NOT dump files (gitignored).

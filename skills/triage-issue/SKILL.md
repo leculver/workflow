@@ -1,11 +1,11 @@
 ---
-name: rt-triage-issue
+name: triage-issue
 description: >
   Core issue triage engine. Triages a single GitHub issue: fetches details, categorizes as bug/feature/docs/question,
   attempts reproduction and fix, writes structured JSON report and markdown summary. Use when the user says
   "triage" or "work on" an issue. Use when processing issues from a sprint queue, or pass a specific issue
   number to triage on demand. Do NOT use when the user says "load", "continue", or "pick up" an issue —
-  that is rt-load-issue. Reads repo config from config/repos.json.
+  that is load-issue. Reads repo config from config/repos.json.
 ---
 
 # Triage Issue
@@ -20,8 +20,8 @@ Triage a single GitHub issue end-to-end: fetch, categorize, reproduce, attempt f
 
 ## When Not to Use
 
-- Continuing deep investigation on a previously triaged issue (use `rt-load-issue`)
-- Batch processing multiple issues (use `rt-triage-loop`)
+- Continuing deep investigation on a previously triaged issue (use `load-issue`)
+- Batch processing multiple issues (use `triage-loop`)
 
 ## Inputs
 
@@ -37,7 +37,7 @@ Triage a single GitHub issue end-to-end: fetch, categorize, reproduce, attempt f
 
 ### Step 0: Bookkeeping
 
-Invoke `rt-bookkeeping` to pull the triage repo and flush any pending `.progress/` from prior sessions.
+Invoke `bookkeeping` to pull the triage repo and flush any pending `.progress/` from prior sessions.
 
 ### Step 1: Load Configuration
 
@@ -46,8 +46,8 @@ Invoke `rt-bookkeeping` to pull the triage repo and flush any pending `.progress
 3. Load area classification rules, local paths, debugger paths, and dump env vars.
 4. **Also load `related_repos`** — these are repos where the root cause or fix may live. Note their local checkout paths.
 5. **Load `coding_guidelines`** — if the repo has a `coding_guidelines` array, load it. These are repo-specific rules about preferred APIs, patterns, and conventions that must be followed when writing fixes.
-6. **Load local tools** — read `config/local-tools.json` via `rt-local-tools` (action: `list`). This puts tool paths in context so you don't need to search for them during reproduction or fix attempts.
-7. If the repo is not configured, stop and tell the user to run `rt-add-repo` first.
+6. **Load local tools** — read `config/local-tools.json` via `local-tools` (action: `list`). This puts tool paths in context so you don't need to search for them during reproduction or fix attempts.
+7. If the repo is not configured, stop and tell the user to run `add-repo` first.
 
 ### Step 2: Select the Issue
 
@@ -57,7 +57,7 @@ Invoke `rt-bookkeeping` to pull the triage repo and flush any pending `.progress
 1. Look for an active sprint run in `runs/` for this repo and platform.
 2. Find the most recent `run.json` where `status` is `in-progress`.
 3. Read its `queue` array and pick the last entry (pop from end).
-4. If no active sprint or empty queue, tell the user to run `rt-find-untriaged` to discover untriaged issues, or provide an issue number directly.
+4. If no active sprint or empty queue, tell the user to run `find-untriaged` to discover untriaged issues, or provide an issue number directly.
 5. Update the run's queue (remove the selected issue) and save.
 
 ### Step 3: Fetch Issue Details
@@ -189,8 +189,8 @@ When creating a fix:
 
 | Pitfall | Solution |
 |---------|----------|
-| Repo not in config | Run `rt-add-repo` first |
-| No active sprint | Run `rt-find-untriaged` to discover untriaged issues |
+| Repo not in config | Run `add-repo` first |
+| No active sprint | Run `find-untriaged` to discover untriaged issues |
 | Left source repo on wrong branch | Always `git checkout main` in every repo touched when done |
 | Lost context from prior sessions | Append to `log.md`, never overwrite it |
 | Full test suite run | Only run targeted tests — full suite takes 50+ min |

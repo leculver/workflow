@@ -1,5 +1,5 @@
 ---
-name: rt-local-tools
+name: local-tools
 description: >
   Resolves local tool paths from config/local-tools.json. Handles lookup, search, user prompting, and
   registration in one flow. Use when any skill needs a local tool (cdb, lldb, dotnet-dump, etc.) —

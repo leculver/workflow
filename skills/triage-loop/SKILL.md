@@ -1,7 +1,7 @@
 ---
-name: rt-triage-loop
+name: triage-loop
 description: >
-  Runs the triage loop: repeatedly invokes rt-triage-issue for the current sprint until the queue is empty
+  Runs the triage loop: repeatedly invokes triage-issue for the current sprint until the queue is empty
   or a limit is reached. Generates the platform-appropriate loop script (bat/sh) or drives the loop directly.
   Use when you want to process multiple issues in one session.
 ---
@@ -18,8 +18,8 @@ Run the issue triage loop: process issues from the sprint queue one at a time un
 
 ## When Not to Use
 
-- Triaging a single specific issue (use `rt-triage-issue`)
-- Setting up triage (use `rt-find-untriaged` to discover issues first)
+- Triaging a single specific issue (use `triage-issue`)
+- Setting up triage (use `find-untriaged` to discover issues first)
 
 ## Inputs
 
@@ -35,13 +35,13 @@ Run the issue triage loop: process issues from the sprint queue one at a time un
 
 ### Step 0: Bookkeeping
 
-Invoke `rt-bookkeeping` to pull the triage repo and flush any pending `.progress/` from prior sessions.
+Invoke `bookkeeping` to pull the triage repo and flush any pending `.progress/` from prior sessions.
 
 ### Step 1: Find Active Sprint
 
 1. Read `config/repos.json` to validate the repo.
 2. Scan `runs/` for the most recent `in-progress` sprint for this repo.
-3. If none found, tell the user to run `rt-find-untriaged` to discover issues first.
+3. If none found, tell the user to run `find-untriaged` to discover issues first.
 4. Read the sprint's `run.json` and check the queue.
 
 ### Step 2a: Generate Script (if generate_script is true)
@@ -89,7 +89,7 @@ Write the script to the sprint's run directory: `runs/<run_id>/triage-loop.bat` 
    b. If queue is empty, mark sprint complete and stop.
    c. If `count` limit reached or `timeout_minutes` exceeded, stop.
    d. Pop the last issue from the queue.
-   e. Invoke the `rt-triage-issue` workflow for that issue.
+   e. Invoke the `triage-issue` workflow for that issue.
    f. Move the issue number from `queue` to `processed` in `run.json`.
    g. Update `run.json` and commit.
    h. Repeat.
@@ -123,7 +123,7 @@ Next: "continue the triage loop" or "generate the summary"
 
 | Pitfall | Solution |
 |---------|----------|
-| No active sprint | Run `rt-find-untriaged` to discover issues first |
+| No active sprint | Run `find-untriaged` to discover issues first |
 | Script has wrong paths | Always use absolute paths in generated scripts |
 | Copilot crashes mid-loop | The sentinel file pattern ensures restart picks up where it left off |
 | Timeout not honored | Check elapsed time after each issue, not during |

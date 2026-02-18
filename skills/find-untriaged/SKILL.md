@@ -1,5 +1,5 @@
 ---
-name: rt-find-untriaged
+name: find-untriaged
 description: >
   Finds open GitHub issues that have not been triaged yet (no report.json in their issue folder).
   Queries all configured repos by default, or a single repo if specified. Outputs a summary
@@ -20,8 +20,8 @@ Discover open issues that have no triage report yet.
 
 ## When Not to Use
 
-- Building a sprint queue (use `rt-triage-loop` to process multiple issues)
-- Checking status of already-triaged issues (use `rt-triage-status`)
+- Building a sprint queue (use `triage-loop` to process multiple issues)
+- Checking status of already-triaged issues (use `triage-status`)
 
 ## Inputs
 
@@ -36,7 +36,7 @@ Discover open issues that have no triage report yet.
 Run the Python script that does the actual work:
 
 ```
-python .agents/skills/rt-find-untriaged/find_untriaged.py [--repo owner/repo] [--show N]
+python .agents/skills/find-untriaged/find_untriaged.py [--repo owner/repo] [--show N]
 ```
 
 The script:
@@ -74,8 +74,8 @@ If the user asks for all, show the full list.
 ### Step 3: Suggest Next Steps
 
 Based on the results, suggest:
-- If few untriaged: "Run `rt-triage-issue` on #NNNN to triage it"
-- If many untriaged: "Run `rt-triage-loop` to process multiple issues"
+- If few untriaged: "Run `triage-issue` on #NNNN to triage it"
+- If many untriaged: "Run `triage-loop` to process multiple issues"
 - If zero untriaged: "All caught up! 🎉"
 
 ## Validation

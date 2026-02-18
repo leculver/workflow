@@ -1,5 +1,5 @@
 ---
-name: rt-generate-summary
+name: generate-summary
 description: >
   Generates a triage summary dashboard from all issue reports for a repository. Produces a timestamped
   markdown summary with tables grouped by status and area, links to reports and GitHub issues, and PR
@@ -20,8 +20,8 @@ Build a comprehensive triage summary dashboard from all issue report data.
 
 ## When Not to Use
 
-- Querying status of a single issue (use `rt-triage-status`)
-- Triaging issues (use `rt-triage-issue`)
+- Querying status of a single issue (use `triage-status`)
+- Triaging issues (use `triage-issue`)
 
 ## Inputs
 
@@ -47,7 +47,7 @@ Instead:
 
 ### Step 0: Bookkeeping
 
-Invoke `rt-bookkeeping` to pull the triage repo and flush any pending `.progress/` from prior sessions.
+Invoke `bookkeeping` to pull the triage repo and flush any pending `.progress/` from prior sessions.
 
 ### Step 1: Select Repository
 
@@ -139,7 +139,7 @@ See [summary format reference](references/summary-format.md) for the full templa
 1. Write the reports data to a temp JSON file: `[{"number": N, "has_report_md": bool, "data": <report.json>}, ...]`
 2. Run the reference script:
    ```
-   python <triage_root>/.agents/skills/rt-generate-summary/references/generate-summary.py <owner/repo> <triage_root> <reports_tmp> <prs_tmp>
+   python <triage_root>/.agents/skills/generate-summary/references/generate-summary.py <owner/repo> <triage_root> <reports_tmp> <prs_tmp>
    ```
 3. The script writes to `summaries/<owner>-<repo>/<YYYY-MM-DD>.md` and `summaries/<owner>-<repo>/latest.md`.
 4. Clean up temp JSON files.

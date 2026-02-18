@@ -1,5 +1,5 @@
 ---
-name: rt-bookkeeping
+name: bookkeeping
 description: >
   Flushes in-progress investigation notes (.progress/) into captain's logs and reports, and pulls the
   triage repo. Called by other skills at startup, or standalone via "clean up", "flush progress", or
@@ -89,7 +89,7 @@ Do NOT include `Co-authored-by: Copilot` in commit messages.
 
 Multiple Copilot sessions may be running simultaneously. The rename-before-flush pattern provides lightweight coordination:
 
-- **Writer (rt-load-issue):** Appends to `.progress/<timestamp>.md`. If the file disappeared (was renamed by a flush), the writer should create a new `.progress/<new-timestamp>.md` and continue. No data is lost — the old content was already claimed by the flusher.
+- **Writer (load-issue):** Appends to `.progress/<timestamp>.md`. If the file disappeared (was renamed by a flush), the writer should create a new `.progress/<new-timestamp>.md` and continue. No data is lost — the old content was already claimed by the flusher.
 - **Flusher (this skill):** Renames `.md` → `.flushing.md` before reading. If the rename fails, another flusher got there first. Skip and move on.
 - **No locking required.** Worst case: a progress note written between rename and delete is lost. This is acceptable — these are investigation notes, not transactions.
 - **Partial flushes are fine.** If this skill crashes mid-flush, `.flushing.md` files remain on disk. The next bookkeeping run will pick them up and finish the job.

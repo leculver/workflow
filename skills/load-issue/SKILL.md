@@ -1,11 +1,11 @@
 ---
-name: rt-load-issue
+name: load-issue
 description: >
   Loads all prior context for a specific issue and presents a briefing to the developer. Use when the user
   says "load", "continue", or "pick up" an issue. Reads the existing JSON report, captain's log, reproduction
   artifacts, fix branches, and latest GitHub comments. Does NOT autonomously investigate — instead primes the
   conversation so the developer can ask followups, try things, and direct the investigation interactively.
-  Do NOT use when the user says "triage" or "work on" an issue — that is rt-triage-issue.
+  Do NOT use when the user says "triage" or "work on" an issue — that is triage-issue.
 ---
 
 # Continue Issue
@@ -20,9 +20,9 @@ Load all prior context for an issue and brief the developer for an interactive i
 
 ## When Not to Use
 
-- First-time triage of an issue (use `rt-triage-issue`)
-- Batch processing (use `rt-triage-loop`)
-- Fully automated re-investigation (use `rt-triage-issue` with the issue number)
+- First-time triage of an issue (use `triage-issue`)
+- Batch processing (use `triage-loop`)
+- Fully automated re-investigation (use `triage-issue` with the issue number)
 
 ## Inputs
 
@@ -36,7 +36,7 @@ Load all prior context for an issue and brief the developer for an interactive i
 
 ### Step 0: Bookkeeping
 
-Invoke `rt-bookkeeping` to pull the triage repo and flush any pending `.progress/` from prior sessions.
+Invoke `bookkeeping` to pull the triage repo and flush any pending `.progress/` from prior sessions.
 
 ### Step 1: Locate and Load Prior Work
 
@@ -47,7 +47,7 @@ Before doing anything else, gather ALL context:
 - Find the entry for the issue's repo and load its `related_repos` with their local checkout paths.
 - These related repos are part of the investigation scope — the root cause or fix may live in any of them.
 - **Load `coding_guidelines`** — if the repo has a `coding_guidelines` array, load it and include in the briefing. These must be followed when writing or modifying code during the session.
-- **Load local tools** — read `config/local-tools.json` via `rt-local-tools` (action: `list`). This puts tool paths in context for the interactive session so you can launch debuggers, analyzers, etc. without searching.
+- **Load local tools** — read `config/local-tools.json` via `local-tools` (action: `list`). This puts tool paths in context for the interactive session so you can launch debuggers, analyzers, etc. without searching.
 
 **b) Infer repo if not provided:**
 - Search `issues/*/issue_number/report.json` across all repo directories in the triage repo.
@@ -127,8 +127,8 @@ Follow the developer's lead. When they ask you to do something, do it and report
 1. Create `issues/<owner>-<repo>/<issue_number>/.progress/` if it doesn't exist.
 2. At the start of the session, create a file named `<ISO-8601-timestamp>.md` (e.g., `2026-02-17T13-30-00Z.md`).
 3. Append to this file as you go — key findings, commands run, code read, conclusions reached. Write in the same style as a captain's log entry.
-4. **If your progress file disappears** (renamed by `rt-bookkeeping` flushing from another session), create a new one with a fresh timestamp and continue. The prior content was already captured.
-5. This file is gitignored and local-only. It exists as a safety net so that if the session ends without an explicit save, the next `rt-bookkeeping` run will flush it into `log.md`.
+4. **If your progress file disappears** (renamed by `bookkeeping` flushing from another session), create a new one with a fresh timestamp and continue. The prior content was already captured.
+5. This file is gitignored and local-only. It exists as a safety net so that if the session ends without an explicit save, the next `bookkeeping` run will flush it into `log.md`.
 
 ### Step 4: Update Reports (when the developer says they're done)
 

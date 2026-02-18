@@ -1,5 +1,5 @@
 ---
-name: rt-triage-status
+name: triage-status
 description: >
   Shows the current status of triage work: sprint progress, issue counts by status/category/area, fix
   candidates, platform-blocked items, and cross-sprint history. Use when you want a quick overview of
@@ -20,8 +20,8 @@ Query and display the current state of triage work across sprints and repos.
 
 ## When Not to Use
 
-- Generating the full formatted summary dashboard (use `rt-generate-summary`)
-- Triaging issues (use `rt-triage-issue`)
+- Generating the full formatted summary dashboard (use `generate-summary`)
+- Triaging issues (use `triage-issue`)
 
 ## Inputs
 
@@ -36,7 +36,7 @@ Query and display the current state of triage work across sprints and repos.
 
 ### Step 0: Bookkeeping
 
-Invoke `rt-bookkeeping` to pull the triage repo and flush any pending `.progress/` from prior sessions.
+Invoke `bookkeeping` to pull the triage repo and flush any pending `.progress/` from prior sessions.
 
 ### Step 1: Gather Data
 

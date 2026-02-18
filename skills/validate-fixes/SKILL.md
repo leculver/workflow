@@ -1,5 +1,5 @@
 ---
-name: rt-validate-fixes
+name: validate-fixes
 description: >
   Validates fix candidates across triaged issues. Checks that fix branches exist, apply cleanly to main,
   pass targeted tests, and haven't been superseded by merged PRs. Reports which fixes are ready for PR,
@@ -19,8 +19,8 @@ Check the health and readiness of all fix candidates in the triage system.
 
 ## When Not to Use
 
-- Creating fixes (use `rt-triage-issue` or `rt-load-issue`)
-- Triaging new issues (use `rt-triage-issue`)
+- Creating fixes (use `triage-issue` or `load-issue`)
+- Triaging new issues (use `triage-issue`)
 
 ## Inputs
 
@@ -35,7 +35,7 @@ Check the health and readiness of all fix candidates in the triage system.
 
 ### Step 0: Bookkeeping
 
-Invoke `rt-bookkeeping` to pull the triage repo and flush any pending `.progress/` from prior sessions.
+Invoke `bookkeeping` to pull the triage repo and flush any pending `.progress/` from prior sessions.
 
 ### Step 1: Gather Fix Candidates
 
