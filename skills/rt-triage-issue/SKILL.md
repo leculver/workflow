@@ -127,7 +127,8 @@ When creating a fix:
 5. Set `fix.confidence` lower for fixes without reproduction (e.g., 0.4–0.6 vs. 0.8+ for reproduced fixes).
 6. Push the branch to `origin` (the user's fork), NOT `upstream`. Do this for each repo where a branch was created.
 7. Do NOT include `Co-authored-by: Copilot` in fix commit messages — these are proposed fixes authored by the developer.
-8. Return all repos to their main branches when done.
+8. **Use only standard ASCII characters** in code, comments, and commit messages. Do not use em-dashes, smart quotes, or other non-ASCII punctuation. Use `--` instead of `—`, straight quotes instead of curly quotes, etc.
+9. Return all repos to their main branches when done.
 
 ### Step 8: Write Reports
 
