@@ -7,9 +7,9 @@ The summary follows this exact section order:
 1. **Overview** — Stats table with counts
 2. **Changes Since Last Summary** — What's new (only if a prior summary exists)
 3. **Open Pull Requests** — Open PRs authored by leculver with linked issues
-4. **Blocked Issues** — Issues blocked on external dependencies, upstream fixes, or unreleased packages
-5. **Area sections** — One section per area (e.g., SOS, dotnet-dump), sorted by issue count descending. Only issues NOT in the "should close", "blocked", or "docs" sections.
-6. **Documentation Issues** — All docs issues in a single flat table (not split by area)
+4. **Area sections** — One section per area (e.g., SOS, dotnet-dump), sorted by issue count descending. Only issues NOT in the "should close", "blocked", or "docs" sections.
+5. **Documentation Issues** — All docs issues in a single flat table (not split by area)
+6. **Blocked Issues** — Issues blocked on external dependencies, upstream fixes, or unreleased packages
 7. **Issues That Should Be Closed** — Stale, already-fixed, by-design, etc. (at the end since they need the least attention)
 
 ## Full Template
@@ -45,14 +45,6 @@ Only include PRs authored by leculver.
 |----|--------|-------|---------------|
 | [#NNN](url) | leculver | title | [#N](url), ... |
 
-## Blocked Issues (N issues)
-
-| Issue | GitHub | Title | State | Act | Assignees | Blocked On | Summary |
-|-------|--------|-------|-------|-----|-----------|------------|---------|
-| [N](path) | [#N](url) | title | 🔵 Open | ⚪ | user1 | [reason](url) | summary |
-
-(Issues blocked on external dependencies, upstream fixes, or unreleased packages. Not actionable until the blocker resolves.)
-
 ## <Area Name> (N issues)
 
 (same table format, one section per area, sorted by count desc)
@@ -60,6 +52,14 @@ Only include PRs authored by leculver.
 ## Documentation Issues
 
 (same table format, single combined section — not split by area)
+
+## Blocked Issues (N issues)
+
+| Issue | GitHub | Title | State | Act | Assignees | Blocked On | Summary |
+|-------|--------|-------|-------|-----|-----------|------------|---------|
+| [N](path) | [#N](url) | title | 🔵 Open | ⚪ | user1 | [reason](url) | summary |
+
+(Issues blocked on external dependencies, upstream fixes, or unreleased packages. Not actionable until the blocker resolves.)
 
 ## Issues That Should Be Closed (N issues open, M already closed)
 

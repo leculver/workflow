@@ -256,17 +256,6 @@ def main():
     else:
         lines += ["No open pull requests.", ""]
 
-    # Blocked
-    lines.append(f"## Blocked Issues ({len(blocked)} issues)")
-    lines.append("")
-    if blocked:
-        lines += [BLOCKED_HEADER, BLOCKED_SEP]
-        for i in sorted(blocked, key=lambda x: x.number):
-            lines.append(i.to_blocked_row())
-        lines.append("")
-    else:
-        lines += ["No blocked issues.", ""]
-
     # Areas
     for area_name, issues in sorted_areas:
         lines += [f"## {area_name} ({len(issues)} issues)", "", TABLE_HEADER, TABLE_SEP]
@@ -284,6 +273,17 @@ def main():
         lines.append("")
     else:
         lines += ["No documentation issues.", ""]
+
+    # Blocked (near the end)
+    lines.append(f"## Blocked Issues ({len(blocked)} issues)")
+    lines.append("")
+    if blocked:
+        lines += [BLOCKED_HEADER, BLOCKED_SEP]
+        for i in sorted(blocked, key=lambda x: x.number):
+            lines.append(i.to_blocked_row())
+        lines.append("")
+    else:
+        lines += ["No blocked issues.", ""]
 
     # Should Be Closed (at the end)
     lines.append(f"## Issues That Should Be Closed ({len(should_close_open)} issues open, {len(should_close_closed)} already closed)")

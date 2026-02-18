@@ -89,7 +89,10 @@ Everything not in "should close", "blocked", or "docs" sections, classified usin
 **Section 2 — Documentation Issues:**
 Issues with category `docs` that are NOT in the "should close" section. Single combined table (not split by area).
 
-**Section 3 — Should Be Closed (at the end of the file):**
+**Section 3 — Blocked Issues:**
+Issues with status `blocked`. These are waiting on external dependencies and need no immediate action.
+
+**Section 4 — Should Be Closed (at the very end):**
 Issues with status in: `already-fixed`, `already-implemented`, `by-design`, `stale`, `wont-fix`, `duplicate`.
 Count how many of these are still open vs already closed on GitHub. Display the header as:
 `## Issues That Should Be Closed (N issues open, M already closed)`
