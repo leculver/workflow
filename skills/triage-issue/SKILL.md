@@ -161,6 +161,7 @@ When creating a fix:
    - Explain the issue, triage status, category, staleness.
    - Full accounting of investigation and reproduction attempts.
    - Describe any fix candidate.
+   - Include a link to the captain's log: `[Log](log.md)`
    - Write atomically.
 
 ### Step 9: Commit Results
