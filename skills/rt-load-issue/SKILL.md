@@ -46,6 +46,7 @@ Before doing anything else, gather ALL context:
 - Read `config/repos.json` from the triage repo root.
 - Find the entry for the issue's repo and load its `related_repos` with their local checkout paths.
 - These related repos are part of the investigation scope — the root cause or fix may live in any of them.
+- **Load `coding_guidelines`** — if the repo has a `coding_guidelines` array, load it and include in the briefing. These must be followed when writing or modifying code during the session.
 - **Load local tools** — read `config/local-tools.json` via `rt-local-tools` (action: `list`). This puts tool paths in context for the interactive session so you can launch debuggers, analyzers, etc. without searching.
 
 **b) Infer repo if not provided:**

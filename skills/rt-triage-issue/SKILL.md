@@ -46,8 +46,9 @@ Invoke `rt-bookkeeping` to pull the triage repo and flush any pending `.progress
 2. Find the entry for the requested `repo`.
 3. Load area classification rules, local paths, debugger paths, and dump env vars.
 4. **Also load `related_repos`** — these are repos where the root cause or fix may live. Note their local checkout paths.
-5. **Load local tools** — read `config/local-tools.json` via `rt-local-tools` (action: `list`). This puts tool paths in context so you don't need to search for them during reproduction or fix attempts.
-6. If the repo is not configured, stop and tell the user to run `rt-add-repo` first.
+5. **Load `coding_guidelines`** — if the repo has a `coding_guidelines` array, load it. These are repo-specific rules about preferred APIs, patterns, and conventions that must be followed when writing fixes.
+6. **Load local tools** — read `config/local-tools.json` via `rt-local-tools` (action: `list`). This puts tool paths in context so you don't need to search for them during reproduction or fix attempts.
+7. If the repo is not configured, stop and tell the user to run `rt-add-repo` first.
 
 ### Step 2: Select the Issue
 
@@ -118,7 +119,8 @@ Do NOT attempt a fix if:
 - The fix would require major architectural changes or is highly speculative.
 
 When creating a fix:
-1. **Create the branch in the repo where the fix belongs**, not necessarily the issue's repo. Use `affected_repo` from Step 5 to determine this. For example, a `dotnet/diagnostics` issue whose root cause is in `dotnet/runtime` gets a fix branch in the runtime checkout. If the fix spans multiple repos, create branches in each.
+1. **Follow `coding_guidelines`** from the repo config (loaded in Step 1). These define preferred APIs, patterns, and conventions for this codebase. Violations will be caught in code review.
+2. **Create the branch in the repo where the fix belongs**, not necessarily the issue's repo. Use `affected_repo` from Step 5 to determine this. For example, a `dotnet/diagnostics` issue whose root cause is in `dotnet/runtime` gets a fix branch in the runtime checkout. If the fix spans multiple repos, create branches in each.
 2. Branch name: `issue_<NUMBER>` (using the original issue number, even in a different repo).
 3. Make the fix, run targeted tests if possible.
 4. Record the fix details (summary, confidence, branch, diff) in the JSON. If the fix is in a different repo than the issue, note which repo the branch is in (e.g., `"branch": "issue_1837"`, `"fix_repo": "dotnet/runtime"`).

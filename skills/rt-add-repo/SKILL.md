@@ -78,6 +78,9 @@ Create the repo entry for `config/repos.json`:
         "title_keywords": ["<matching-keywords>"]
       }
     },
+    "coding_guidelines": [
+      "<optional repo-specific rules about preferred APIs, patterns, and conventions for writing fixes>"
+    ],
     "debugger": {
       "windows": "<path or null>",
       "linux": "<command or null>"
