@@ -128,7 +128,7 @@ Multiple Copilot sessions may be running simultaneously. The rename-before-flush
 ```json
 [
   {
-    "path": "D:\\git\\work\\dumps\\2026-02-19_crash-analysis.dmp",
+    "path": "D:\\work\\dumps\\2026-02-19_crash-analysis.dmp",
     "ingested_at": "2026-02-19T16:00:00Z",
     "file_timestamp": "2026-02-18T10:30:00Z",
     "delete_after": "2026-03-19T16:00:00Z"

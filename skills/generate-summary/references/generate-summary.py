@@ -7,7 +7,7 @@ Usage:
 
 Arguments:
     owner/repo        Repository in owner/repo format (e.g., dotnet/diagnostics)
-    triage_repo_root  Path to the triage repo root (e.g., D:\git\work)
+    triage_repo_root  Path to the triage repo root (e.g., D:\work)
     reports_json      Path to a JSON file containing all issue report data
     prs_json          Path to a JSON file containing open PR data with linked issues
 
@@ -31,7 +31,7 @@ def main():
         sys.exit(1)
 
     full_repo = sys.argv[1]          # e.g., "dotnet/diagnostics"
-    base = sys.argv[2]               # e.g., "D:\git\work"
+    base = sys.argv[2]               # e.g., "D:\work"
     reports_path = sys.argv[3]       # path to reports JSON
     prs_path = sys.argv[4]           # path to PRs JSON
 

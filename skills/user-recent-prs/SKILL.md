@@ -27,7 +27,7 @@ Query GitHub for the authenticated user's recent pull requests and produce a mar
 |-------|----------|-------------|
 | user | No | GitHub username to query. If omitted, resolves from `git config user.email` / `user.name`. |
 | since | Yes | Start date for the query in ISO 8601 format (e.g., `2026-02-02`) or a natural-language duration (e.g., `2 weeks ago`). Only PRs created on or after this date are included. |
-| output | Yes | Absolute path to the markdown file to write or update (e.g., `D:\git\work\notes\2026_02_16_diag.md`). |
+| output | Yes | Absolute path to the markdown file to write or update (e.g., `D:\work\notes\2026_02_16_diag.md`). |
 
 ## Workflow
 

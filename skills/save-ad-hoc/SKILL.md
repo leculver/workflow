@@ -29,6 +29,7 @@ Distill the relevant portion of the current conversation into a concise markdown
 |-------|----------|-------------|
 | topic | No | Short description of what to capture. If omitted, infer from the conversation. |
 | filename | No | Override the generated filename. If omitted, auto-generate from date and topic. |
+| repo | No | Override the target repo/project. If omitted, infer from conversation context. |
 
 ## Workflow
 
@@ -49,9 +50,28 @@ Look back through the conversation and identify the **most recent coherent topic
   - A decision or conclusion reached
 - When in doubt about scope, capture less rather than more. The note should be **focused**.
 
-### Step 2: Determine the Filename
+### Step 2: Determine the Target Directory
 
-Generate a filename following the existing convention in `notes/`:
+Notes are organized by whether they are specific to a repo/project or cross-cutting:
+
+- **Repo-specific notes** go in `notes/<repo>/` — e.g., `notes/keystone/`, `notes/clrmd/`, `notes/diagnostics/`
+- **Cross-cutting or unaffiliated notes** go in `notes/` root
+
+**How to determine the repo:**
+
+1. If the `repo` input is provided, use that.
+2. Otherwise, infer from the conversation context:
+   - What repo/project has the user been working in during this session?
+   - Look at file paths referenced, commands run, topic discussed.
+   - Known repo directory names: `keystone`, `clrmd`, `diagnostics`, `runtime`, `perfview`
+3. If the note spans multiple repos or isn't clearly tied to one, use the `notes/` root.
+4. If ambiguous, **ask the user** rather than guessing.
+
+Create the subdirectory if it doesn't exist yet.
+
+### Step 3: Determine the Filename
+
+Generate a filename following the existing convention:
 
 ```
 YYYY_MM_DD_<slug>.md
@@ -62,7 +82,11 @@ YYYY_MM_DD_<slug>.md
 - Examples: `2026_02_17_arm64-relocation-handling.md`, `2026_02_17_sos-icon-choices.md`
 - If `filename` input is provided, use that instead (still ensure it ends in `.md`).
 
-### Step 3: Write the Note
+The full path will be either:
+- `notes/<repo>/YYYY_MM_DD_<slug>.md` (repo-specific)
+- `notes/YYYY_MM_DD_<slug>.md` (cross-cutting)
+
+### Step 4: Write the Note
 
 Write a markdown file that captures the investigation naturally. There is **no fixed format** — write whatever structure fits the content. It might be:
 
@@ -80,10 +104,10 @@ Write a markdown file that captures the investigation naturally. There is **no f
 - Do not dump raw conversation transcript. Distill and organize.
 - If code or commands were important to the finding, include them.
 
-### Step 4: Commit and Push
+### Step 5: Commit and Push
 
-1. `git add notes/<filename>`
-2. Commit: `notes: <slug>`
+1. `git add notes/<path>`
+2. Commit: `notes: <slug>` (or `notes/<repo>: <slug>` for repo-specific notes)
 3. Push to origin.
 
 Do NOT include `Co-authored-by: Copilot` in commit messages.
@@ -91,6 +115,7 @@ Do NOT include `Co-authored-by: Copilot` in commit messages.
 ## Validation
 
 - [ ] Note captures the correct topic, not unrelated prior conversation
+- [ ] Note is saved in the correct directory (repo-specific vs. cross-cutting)
 - [ ] Filename follows `YYYY_MM_DD_<slug>.md` convention
 - [ ] Content is self-contained and understandable out of context
 - [ ] Committed and pushed
@@ -104,3 +129,5 @@ Do NOT include `Co-authored-by: Copilot` in commit messages.
 | Too verbose | Distill, don't transcribe — notes should be concise |
 | Missing context | Include enough "why" that future-you understands the relevance |
 | Forgetting to commit | Always commit and push after writing |
+| Wrong directory | Repo-specific notes go in `notes/<repo>/`, cross-cutting in `notes/` root |
+| Guessing the repo | If ambiguous, ask the user — don't guess |
