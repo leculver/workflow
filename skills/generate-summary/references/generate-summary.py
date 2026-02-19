@@ -105,21 +105,43 @@ def main():
             triage = d.get("triage", {})
             fix = d.get("fix", {})
 
-            self.title = issue.get("title", "")
-            self.state = issue.get("state", "open")
-            self.url = issue.get("url", f"https://github.com/{owner}/{repo_name}/issues/{self.number}")
-            self.labels = issue.get("labels", [])
-            self.manually_investigated = issue.get("manually_investigated", False)
-            self.assignees = issue.get("assignees", [])
+            # Support both nested (new) and flat (old) report schemas
+            if issue:
+                self.title = issue.get("title", "")
+                self.state = issue.get("state", "open")
+                self.url = issue.get("url", f"https://github.com/{owner}/{repo_name}/issues/{self.number}")
+                self.labels = issue.get("labels", [])
+                self.manually_investigated = issue.get("manually_investigated", False)
+                self.assignees = issue.get("assignees", [])
+            else:
+                self.title = d.get("title", "")
+                self.state = d.get("state", "open")
+                self.url = d.get("url", f"https://github.com/{owner}/{repo_name}/issues/{self.number}")
+                self.labels = d.get("labels", [])
+                self.manually_investigated = d.get("manually_investigated", False)
+                assignee = d.get("assignee", "")
+                self.assignees = d.get("assignees", [assignee] if assignee else [])
 
-            self.category = triage.get("category", "")
-            self.status = triage.get("status", "")
-            self.status_reason = triage.get("status_reason", "")
-            self.affected_repo = triage.get("affected_repo", "")
-            self.actionability = triage.get("actionability", "low")
-            self.blocked_reason = triage.get("blocked_reason", "")
+            if triage:
+                self.category = triage.get("category", "")
+                self.status = triage.get("status", "")
+                self.status_reason = triage.get("status_reason", "")
+                self.affected_repo = triage.get("affected_repo", "")
+                self.actionability = triage.get("actionability", "low")
+                self.blocked_reason = triage.get("blocked_reason", "")
+            else:
+                self.category = d.get("category", "")
+                self.status = d.get("status", "")
+                self.status_reason = d.get("status_reason", d.get("summary", ""))
+                self.affected_repo = d.get("affected_repo", "")
+                self.actionability = d.get("actionability", d.get("priority", "low"))
+                self.blocked_reason = d.get("blocked_reason", "")
 
-            self.has_fix = fix.get("has_candidate", False)
+            if fix:
+                self.has_fix = fix.get("has_candidate", False)
+            else:
+                self.has_fix = bool(d.get("fix_branch") or d.get("fix_available")
+                                    or d.get("status", "") in ("fix-candidate", "fix-identified"))
             self.prs = issue_to_prs.get(self.number, [])
 
         def report_link(self):
