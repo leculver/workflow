@@ -205,16 +205,21 @@ Context:
 - Specs: .bookkeeping/<feature>.ralph/specs/
 - Plan: .bookkeeping/<feature>.ralph/PLAN.md
 
-Your job each iteration:
-1. Read PLAN.md and pick the next appropriate incomplete task. Tasks are listed in suggested order but you may reorder based on dependencies, complexity, or what makes sense given the current state of the code.
+IMPORTANT: Complete exactly ONE task per iteration, then STOP. The loop script will
+invoke you again for the next task. This ensures each task gets its own commit,
+its own backpressure check, and the operator can monitor progress between iterations.
+
+Your job this iteration:
+1. Read PLAN.md and pick ONE incomplete task. Tasks are listed in suggested order but you may reorder based on dependencies, complexity, or what makes sense given the current state of the code.
 2. Investigate relevant code — do NOT assume files are missing without checking.
-3. Implement the task.
+3. Implement that ONE task.
 4. Run the backpressure commands (build + test) from AGENTS.md.
-5. If tests fail, fix them before proceeding.
+5. If tests fail, fix them before stopping.
 6. Mark the task as done in PLAN.md: `- [x] Task description`
 7. Add any operational learnings to the Notes section of PLAN.md.
 8. Commit with a clear message describing what was implemented.
 9. Append one progress line to .bookkeeping/<feature>.ralph/progress.log (see AGENTS.md for format).
+10. STOP. Do not continue to the next task.
 
 When ALL tasks are done and tests pass, change the Status line in PLAN.md to:
 STATUS: COMPLETE
