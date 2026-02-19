@@ -36,16 +36,30 @@ The system is designed for cross-repo investigation. An issue filed in one repo 
 
 ### 1. Create a workspace and clone
 
+**Linux / macOS:**
 ```bash
 mkdir my-triage && cd my-triage
 git init
 git clone git@github.com:leculver/workflow.git .agents
 ```
 
+**Windows (PowerShell):**
+```powershell
+mkdir my-triage; cd my-triage
+git init
+git clone git@github.com:leculver/workflow.git .agents
+```
+
 ### 2. Let Copilot set up the rest
 
+**Linux / macOS:**
 ```bash
 copilot -p "$(cat .agents/setup-instructions.md)"
+```
+
+**Windows (PowerShell):**
+```powershell
+copilot -p (Get-Content .agents/setup-instructions.md -Raw)
 ```
 
 This will walk you through:
