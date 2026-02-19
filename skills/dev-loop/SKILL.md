@@ -312,26 +312,52 @@ function Save-LoopNote {
 Push-Location $RepoRoot
 $env:COPILOT_CUSTOM_INSTRUCTIONS_DIRS = $RalphDir
 
+Write-Host ""
+Write-Host "╔══════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
+Write-Host "║  Dev Loop: $Feature" -ForegroundColor Cyan
+Write-Host "║  Repo: $RepoName | CLI: $Cli | Max: $MaxIters iters" -ForegroundColor Cyan
+Write-Host "║  Mode: $Mode" -ForegroundColor Cyan
+Write-Host "╚══════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
+Write-Host ""
+
 try {
     for ($i = 1; $i -le $MaxIters; $i++) {
         $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
         $header = "`n=== Dev Loop iteration $i/$MaxIters ($Mode) — $timestamp ==="
-        Write-Host $header
+        Write-Host $header -ForegroundColor Yellow
         Add-Content -Path $LogFile -Value $header
+
+        # Snapshot progress.log line count before this iteration
+        $progressBefore = 0
+        if (Test-Path $ProgressFile) {
+            $progressBefore = (Get-Content $ProgressFile).Count
+        }
 
         # Read prompt
         $prompt = Get-Content -Path $PromptFile -Raw
 
-        # Run the CLI
+        # Run the CLI (output goes to log file only — keep console clean)
+        Write-Host "  ⏳ Running $Cli..." -ForegroundColor DarkGray
         switch ($Cli) {
             "copilot" {
-                $output = & copilot -p $prompt --yolo --model claude-opus-4.6 2>&1 | Tee-Object -Append -FilePath $LogFile
+                & copilot -p $prompt --yolo --model claude-opus-4.6 2>&1 | Out-File -Append -FilePath $LogFile
             }
             "claude" {
-                $output = & claude -p $prompt --dangerously-skip-permissions 2>&1 | Tee-Object -Append -FilePath $LogFile
+                & claude -p $prompt --dangerously-skip-permissions 2>&1 | Out-File -Append -FilePath $LogFile
             }
             default {
-                $output = & $Cli $prompt 2>&1 | Tee-Object -Append -FilePath $LogFile
+                & $Cli $prompt 2>&1 | Out-File -Append -FilePath $LogFile
+            }
+        }
+
+        # Show the progress line the agent wrote (if any)
+        if (Test-Path $ProgressFile) {
+            $progressLines = Get-Content $ProgressFile
+            if ($progressLines.Count -gt $progressBefore) {
+                $latestProgress = $progressLines[-1]
+                Write-Host "  $latestProgress" -ForegroundColor White
+            } else {
+                Write-Host "  (no progress line written by agent)" -ForegroundColor DarkGray
             }
         }
 
@@ -339,42 +365,46 @@ try {
         if (Test-Path $PlanFile) {
             $planContent = Get-Content -Path $PlanFile -Raw
             if ($planContent -match [regex]::Escape($PlanSentinel)) {
-                Write-Host "`n✅ Plan marked COMPLETE. Stopping."
+                Write-Host "`n✅ Plan marked COMPLETE. Stopping." -ForegroundColor Green
                 Add-Content -Path $LogFile -Value "`n✅ Completed at iteration $i"
                 Save-LoopNote "✅ Completed ($i iterations)"
                 exit 0
             }
             # In BOTH mode: transition from planning to building
             if ($Mode -eq "planning" -and $planContent -match [regex]::Escape($PlanReadySentinel)) {
-                Write-Host "`n📋 Plan ready. Switching to BUILDING mode."
+                Write-Host "  📋 Plan ready. Switching to BUILDING mode." -ForegroundColor Cyan
                 Add-Content -Path $LogFile -Value "`n📋 Switching to building at iteration $i"
                 $Mode = "building"
-                # Swap prompt to building variant
                 $buildingPrompt = Join-Path $RalphDir "PROMPT.building.md"
                 if (Test-Path $buildingPrompt) {
                     Copy-Item $buildingPrompt $PromptFile -Force
                 }
-                # Update plan status
                 (Get-Content $PlanFile -Raw) -replace 'STATUS: PLAN_COMPLETE', 'STATUS: IN_PROGRESS' |
                     Set-Content $PlanFile
             }
+
+            # Show plan task counts
+            $done = ([regex]::Matches($planContent, '- \[x\]')).Count
+            $remaining = ([regex]::Matches($planContent, '- \[ \]')).Count
+            Write-Host "  📊 Tasks: $done done, $remaining remaining" -ForegroundColor DarkCyan
         }
 
         # Run backpressure (tests)
         if ($TestCmd -and $Mode -eq "building") {
-            Write-Host "`nRunning backpressure: $TestCmd"
+            Write-Host "  🧪 Running tests: $TestCmd" -ForegroundColor DarkGray
             Add-Content -Path $LogFile -Value "`nBackpressure: $TestCmd"
             try {
-                Invoke-Expression $TestCmd 2>&1 | Tee-Object -Append -FilePath $LogFile
+                Invoke-Expression $TestCmd 2>&1 | Out-File -Append -FilePath $LogFile
                 Add-Content -Path $LogFile -Value "Backpressure: PASSED"
+                Write-Host "  🧪 Tests: PASSED" -ForegroundColor Green
             } catch {
                 Add-Content -Path $LogFile -Value "Backpressure: FAILED — $($_.Exception.Message)"
-                Write-Host "⚠️ Tests failed. Next iteration will attempt to fix."
+                Write-Host "  🧪 Tests: FAILED" -ForegroundColor Red
             }
         }
     }
 
-    Write-Host "`n❌ Max iterations ($MaxIters) reached without completion."
+    Write-Host "`n❌ Max iterations ($MaxIters) reached without completion." -ForegroundColor Red
     Add-Content -Path $LogFile -Value "`n❌ Max iterations reached"
     Save-LoopNote "❌ Max iterations ($MaxIters) reached"
     exit 1
@@ -462,56 +492,92 @@ cleanup() {
 }
 trap cleanup EXIT
 
+echo ""
+echo "╔══════════════════════════════════════════════════════════╗"
+echo "║  Dev Loop: $FEATURE"
+echo "║  Repo: $REPO_NAME | CLI: $CLI | Max: $MAX_ITERS iters"
+echo "║  Mode: $MODE"
+echo "╚══════════════════════════════════════════════════════════╝"
+echo ""
+
 for i in $(seq 1 "$MAX_ITERS"); do
     TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
-    echo -e "\n=== Dev Loop iteration $i/$MAX_ITERS ($MODE) — $TIMESTAMP ===" | tee -a "$LOG_FILE"
+    echo -e "\n\033[33m=== Dev Loop iteration $i/$MAX_ITERS ($MODE) — $TIMESTAMP ===\033[0m"
+    echo "=== Dev Loop iteration $i/$MAX_ITERS ($MODE) — $TIMESTAMP ===" >> "$LOG_FILE"
+
+    # Snapshot progress.log line count before this iteration
+    PROGRESS_BEFORE=0
+    if [ -f "$PROGRESS_FILE" ]; then
+        PROGRESS_BEFORE=$(wc -l < "$PROGRESS_FILE")
+    fi
 
     PROMPT=$(cat "$PROMPT_FILE")
 
-    # Run the CLI
+    # Run the CLI (output goes to log file only — keep console clean)
+    echo "  ⏳ Running $CLI..."
     case "$CLI" in
         copilot)
-            copilot -p "$PROMPT" --yolo --model claude-opus-4.6 2>&1 | tee -a "$LOG_FILE"
+            copilot -p "$PROMPT" --yolo --model claude-opus-4.6 >> "$LOG_FILE" 2>&1
             ;;
         claude)
-            claude -p "$PROMPT" --dangerously-skip-permissions 2>&1 | tee -a "$LOG_FILE"
+            claude -p "$PROMPT" --dangerously-skip-permissions >> "$LOG_FILE" 2>&1
             ;;
         *)
-            $CLI "$PROMPT" 2>&1 | tee -a "$LOG_FILE"
+            $CLI "$PROMPT" >> "$LOG_FILE" 2>&1
             ;;
     esac
+
+    # Show the progress line the agent wrote (if any)
+    if [ -f "$PROGRESS_FILE" ]; then
+        PROGRESS_AFTER=$(wc -l < "$PROGRESS_FILE")
+        if [ "$PROGRESS_AFTER" -gt "$PROGRESS_BEFORE" ]; then
+            echo "  $(tail -1 "$PROGRESS_FILE")"
+        else
+            echo "  (no progress line written by agent)"
+        fi
+    fi
 
     # Check completion
     if [ -f "$PLAN_FILE" ]; then
         if grep -Fq "$PLAN_SENTINEL" "$PLAN_FILE"; then
-            echo -e "\n✅ Plan marked COMPLETE. Stopping." | tee -a "$LOG_FILE"
+            echo -e "\n\033[32m✅ Plan marked COMPLETE. Stopping.\033[0m"
+            echo "✅ Completed at iteration $i" >> "$LOG_FILE"
             save_note "✅ Completed ($i iterations)"
             exit 0
         fi
         # In BOTH mode: transition from planning to building
         if [ "$MODE" = "planning" ] && grep -Fq "$PLAN_READY_SENTINEL" "$PLAN_FILE"; then
-            echo -e "\n📋 Plan ready. Switching to BUILDING mode." | tee -a "$LOG_FILE"
+            echo "  📋 Plan ready. Switching to BUILDING mode."
+            echo "📋 Switching to building at iteration $i" >> "$LOG_FILE"
             MODE="building"
             if [ -f "$RALPH_DIR/PROMPT.building.md" ]; then
                 cp "$RALPH_DIR/PROMPT.building.md" "$PROMPT_FILE"
             fi
             sed -i 's/STATUS: PLAN_COMPLETE/STATUS: IN_PROGRESS/' "$PLAN_FILE"
         fi
+
+        # Show plan task counts
+        DONE=$(grep -c '^\- \[x\]' "$PLAN_FILE" 2>/dev/null || true)
+        REMAINING=$(grep -c '^\- \[ \]' "$PLAN_FILE" 2>/dev/null || true)
+        echo "  📊 Tasks: $DONE done, $REMAINING remaining"
     fi
 
     # Run backpressure (tests)
     if [ -n "$TEST_CMD" ] && [ "$MODE" = "building" ]; then
-        echo -e "\nRunning backpressure: $TEST_CMD" | tee -a "$LOG_FILE"
-        if bash -lc "$TEST_CMD" 2>&1 | tee -a "$LOG_FILE"; then
+        echo "  🧪 Running tests: $TEST_CMD"
+        echo "Backpressure: $TEST_CMD" >> "$LOG_FILE"
+        if bash -lc "$TEST_CMD" >> "$LOG_FILE" 2>&1; then
             echo "Backpressure: PASSED" >> "$LOG_FILE"
+            echo -e "  🧪 Tests: \033[32mPASSED\033[0m"
         else
             echo "Backpressure: FAILED" >> "$LOG_FILE"
-            echo "⚠️ Tests failed. Next iteration will attempt to fix."
+            echo -e "  🧪 Tests: \033[31mFAILED\033[0m"
         fi
     fi
 done
 
-echo -e "\n❌ Max iterations ($MAX_ITERS) reached without completion." | tee -a "$LOG_FILE"
+echo -e "\n\033[31m❌ Max iterations ($MAX_ITERS) reached without completion.\033[0m"
+echo "❌ Max iterations reached" >> "$LOG_FILE"
 save_note "❌ Max iterations ($MAX_ITERS) reached"
 exit 1
 ```
