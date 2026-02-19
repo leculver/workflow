@@ -79,6 +79,7 @@ Create the directory structure:
   AGENTS.md
   PROMPT.md
   PLAN.md
+  progress.log
   specs/
 ```
 
@@ -151,6 +152,18 @@ Run these commands to validate changes:
 Always run the backpressure commands after making changes. If tests fail, fix them before
 moving to the next task.
 
+## Progress Tracking
+After completing your work this iteration, append exactly ONE line to
+.bookkeeping/<feature>.ralph/progress.log in this format:
+
+    YYYY-MM-DD HH:MM — ✅ — implemented X and tests pass
+    YYYY-MM-DD HH:MM — ❌ — attempted X but tests fail: <reason>
+    YYYY-MM-DD HH:MM — 🔄 — partial progress on X, continuing next iteration
+
+Use ✅ when the task is done and tests pass, ❌ when something failed, 🔄 when
+work is in progress but not complete. Keep descriptions short (one sentence max).
+Do NOT skip this step. Do NOT write more than one line per iteration.
+
 ## Operational Notes
 - <any relevant project conventions, gotchas, or patterns>
 - Update this section if you discover new operational details during implementation.
@@ -177,6 +190,7 @@ Your job:
 3. Update .bookkeeping/<feature>.ralph/PLAN.md with a prioritized task list.
 4. Do NOT implement anything. Do NOT commit code.
 5. If requirements are unclear, write clarifying questions into PLAN.md.
+6. Append one progress line to .bookkeeping/<feature>.ralph/progress.log (see AGENTS.md for format).
 
 When the plan is complete and ready for implementation, change the Status line to:
 STATUS: PLAN_COMPLETE
@@ -200,6 +214,7 @@ Your job each iteration:
 6. Mark the task as done in PLAN.md: `- [x] Task description`
 7. Add any operational learnings to the Notes section of PLAN.md.
 8. Commit with a clear message describing what was implemented.
+9. Append one progress line to .bookkeeping/<feature>.ralph/progress.log (see AGENTS.md for format).
 
 When ALL tasks are done and tests pass, change the Status line in PLAN.md to:
 STATUS: COMPLETE
@@ -426,10 +441,30 @@ To start in building mode directly:
   .\.bookkeeping\workflow-viewer.ralph\loop.ps1 -Mode building
 
 To monitor progress:
+  Get-Content .\.bookkeeping\workflow-viewer.ralph\progress.log -Tail 20
+
+To see full output:
   Get-Content .\.bookkeeping\workflow-viewer.ralph\ralph.log -Tail 50
 
 To stop: Ctrl+C
 ```
+
+## Saving Progress as a Note
+
+When the loop completes (or the user asks to save progress), convert `progress.log` into a
+markdown note using the `save-ad-hoc` skill conventions:
+
+1. Read `progress.log` — each line is a timestamped summary of one iteration.
+2. Read `PLAN.md` — shows final task status.
+3. Write a note to `notes/<repo>/YYYY_MM_DD_<feature>.md` containing:
+   - The goal
+   - The progress log (formatted as a markdown list)
+   - Final plan status (tasks completed vs remaining)
+   - Any notable learnings from PLAN.md's Notes section
+4. Commit and push the note.
+
+This can happen automatically when the loop exits with `STATUS: COMPLETE`, or manually
+when the user says "save" during a session that loaded the `.ralph/` workspace.
 
 ## Resuming an Existing Loop
 
@@ -437,7 +472,8 @@ If a `.bookkeeping/<feature>.ralph/` workspace already exists when this skill is
 
 1. **Do NOT overwrite** — treat it as a resume.
 2. Read the current PLAN.md to assess progress.
-3. Show a status briefing: how many tasks done vs remaining, last log entries.
+3. Read `progress.log` for iteration history.
+4. Show a status briefing: how many tasks done vs remaining, last progress lines.
 4. Ask the user what they want to do:
    - **Continue** — just re-run the loop script (no changes needed)
    - **Update specs** — modify specs, regenerate prompt
@@ -453,6 +489,7 @@ If a `.bookkeeping/<feature>.ralph/` workspace already exists when this skill is
 - [ ] Loop scripts are executable and use correct paths
 - [ ] `COPILOT_CUSTOM_INSTRUCTIONS_DIRS` is set in loop scripts
 - [ ] `.bookkeeping/` is gitignored in target repo
+- [ ] AGENTS.md includes progress tracking instructions
 - [ ] Mode transition (BOTH) works: planning → building
 
 ## Common Pitfalls
@@ -462,6 +499,7 @@ If a `.bookkeeping/<feature>.ralph/` workspace already exists when this skill is
 | AGENTS.md not loaded | Verify `COPILOT_CUSTOM_INSTRUCTIONS_DIRS` points to the `.ralph/` directory |
 | Copilot can't see code | CWD must be repo root, not the `.ralph/` directory |
 | Loop never completes | Check that the prompt instructs the agent to write `STATUS: COMPLETE` |
+| No progress.log entries | Agent may have skipped the step — check AGENTS.md has the progress tracking section |
 | Tests not running | Verify `test_cmd` is correct and runs from repo root |
 | Overwriting existing workspace | Always check for existing `.ralph/` and offer resume |
 | .bookkeeping/ committed to git | Verify `.gitignore` includes `.bookkeeping/` |
