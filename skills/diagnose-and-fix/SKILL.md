@@ -1,36 +1,37 @@
 ---
-name: triage-issue
+name: diagnose-and-fix
 description: >
-  Core issue triage engine. Triages a single GitHub issue: fetches details, categorizes as bug/feature/docs/question,
-  attempts reproduction and fix, writes structured JSON report and markdown summary. Use when the user says
-  "triage" or "work on" an issue. Use when processing issues from a sprint queue, or pass a specific issue
-  number to triage on demand. Do NOT use when the user says "load", "continue", or "pick up" an issue —
-  that is load-issue. Reads repo config from config/repos.json.
+  Full-loop issue investigation: fetches a GitHub issue, classifies it, reproduces the bug, proposes a fix,
+  runs targeted tests, and writes structured reports. Use when the user says "diagnose", "fix", "triage",
+  "work on", or "investigate" an issue. Always attempts reproduction AND a fix — the goal is a working
+  fix candidate, not just classification. Do NOT use when the user says "load", "continue", or "pick up"
+  an issue — that is load-issue. Reads repo config from config/repos.json.
 ---
 
-# Triage Issue
+# Diagnose and Fix
 
-Triage a single GitHub issue end-to-end: fetch, categorize, reproduce, attempt fix, and report.
+Investigate a single GitHub issue end-to-end: classify, reproduce, fix, test, and report.
+
+**The primary goal is a working fix candidate.** Classification is a preliminary step, not the finish line.
+If you stop after classifying the issue without attempting reproduction and a fix, you have not completed this skill.
 
 ## When to Use
 
 - Processing the next issue from a sprint queue
-- Triaging a specific issue by number
-- Re-triaging an issue after new information
+- Investigating a specific issue by number
+- Re-investigating an issue after new information
 
 ## When Not to Use
 
 - Continuing deep investigation on a previously triaged issue (use `load-issue`)
-- Batch processing multiple issues (just run `triage-issue` repeatedly)
+- Batch processing multiple issues (just run `diagnose-and-fix` repeatedly)
 
 ## Inputs
 
 | Input | Required | Description |
 |-------|----------|-------------|
 | repo | Yes | Repository in `owner/repo` format (e.g., `dotnet/diagnostics`) |
-| issue_number | No | Specific issue to triage. If omitted, pick next from sprint queue. |
-| skip_repro | No | Skip reproduction attempt (default: false) |
-| skip_fix | No | Skip fix attempt (default: false) |
+| issue_number | No | Specific issue to investigate. If omitted, pick next from sprint queue. |
 | workspace | No | Path to the workspace root where repo checkouts and repros live (default: parent of triage repo) |
 
 ## Workflow
@@ -80,26 +81,33 @@ Invoke `bookkeeping` to pull the triage repo and flush any pending `.progress/` 
 4. Check if `repros/issue_<issue_number>/` exists in the workspace.
 5. Summarize what's known before proceeding.
 
-### Step 5: Triage
+### Step 5: Classify (quick — do not stop here)
 
-Analyze the issue and determine:
+Quickly classify the issue. This is a **preliminary step** — spend most of your effort on reproduction and fixing.
 
-1. **Category**: bug, feature-request, question, or docs. Read the issue body, labels, and comments carefully.
-2. **Status**: See [triage categories](references/triage-categories.md) for the full list.
-3. **Staleness**: Is this issue current, outdated, or superseded?
+1. **Category**: bug, feature-request, question, or docs.
+2. **Status** (initial): See [triage categories](references/triage-categories.md).
+3. **Staleness**: active, stale, or superseded.
 4. **Area**: Classify using the area rules from `config/repos.json`.
-5. **Platform requirements**: Which platforms are needed to reproduce/investigate?
-6. **Blocked**: If the issue is understood but depends on an external fix, unreleased package, or upstream change, set status to `blocked` with `blocked_reason` and optionally `blocked_url`. Blocked issues are deprioritized in summaries and scoring.
-7. **Actionability**: Derive from the fields above using the rules in [triage categories](references/triage-categories.md) (`triage.actionability` section). Do not set manually — compute it from status, fix candidate, and platform requirements.
-8. **Affected repo**: Determine where the root cause actually lives. An issue filed in `dotnet/diagnostics` may have its root cause in `dotnet/runtime` or `microsoft/perfview`. Set `affected_repo` to the repo where the bug or missing feature actually is — this drives where the fix is created. If the root cause spans multiple repos, set `affected_repo` to the primary one and note the others in `status_reason`.
+5. **Platform requirements**: Which platforms are needed to reproduce?
+6. **Blocked**: If the issue depends on an external fix, unreleased package, or upstream change, set status to `blocked` with `blocked_reason` and optionally `blocked_url`.
+7. **Affected repo**: Determine where the root cause actually lives. Set `affected_repo` to the repo where the bug or missing feature actually is. If the root cause spans multiple repos, set `affected_repo` to the primary one and note the others in `status_reason`.
+8. **Actionability**: Derive from the fields above using the rules in [triage categories](references/triage-categories.md) (`triage.actionability` section). Do not set manually — compute it from status, fix candidate, and platform requirements.
 
-**Cross-repo investigation:** Do NOT limit analysis to the issue's repo. Follow the code across repo boundaries using the `related_repos` local paths loaded in Step 1. If a diagnostics issue calls into runtime or ClrMD code, read that code. If the stack trace points into another repo, investigate there. The issue's repo is where the bug was *reported*, not necessarily where it *lives*.
+**Cross-repo investigation:** Do NOT limit analysis to the issue's repo. Follow the code across repo boundaries using the `related_repos` local paths loaded in Step 1. The issue's repo is where the bug was *reported*, not necessarily where it *lives*.
 
 For feature requests, check if the feature has already been implemented in the current codebase — including related repos.
 
 For bugs, check if the bug has already been fixed since the issue was filed — including in related repos.
 
-### Step 6: Reproduce (unless skip_repro)
+**Do NOT write reports yet.** Proceed directly to Step 6.
+
+### Step 6: Reproduce
+
+**Always attempt reproduction.** Only skip if one of these is true:
+- The issue is a **question** or **docs** category (no bug to reproduce).
+- The status is **already-fixed**, **already-implemented**, **by-design**, **duplicate**, **stale**, or **wont-fix** (nothing to reproduce).
+- The issue is **platform-blocked** and cannot be reproduced on the current OS.
 
 Follow the [reproduction rules](references/reproduction-rules.md):
 
@@ -112,30 +120,43 @@ Follow the [reproduction rules](references/reproduction-rules.md):
 7. Dumps are NOT committed (too large). Instead, commit the repro source and a `repro.sh`/`repro.bat` script to regenerate them. See [reproduction rules](references/reproduction-rules.md) for details.
 8. If reproduction requires a different platform, set status to `platform-blocked` and note which platform.
 
-### Step 7: Attempt Fix (unless skip_fix)
+### Step 7: Fix and Test
+
+**Always attempt a fix** after reproduction (or even without it if the root cause is clear). Only skip if:
+- The issue is a **question** category.
+- The issue is **needs-info** and the root cause is completely unclear.
+- The fix would require major architectural changes that are highly speculative.
 
 Attempt a fix in any of these cases:
 - The bug was **reproduced** and the root cause is understood.
 - The bug was **not reproduced** but the root cause is obvious from code inspection (e.g., clear null check missing, off-by-one, wrong condition). The fix should still be proposed — it helps the developer understand the issue even without a repro.
 - A **feature request** has a straightforward implementation path.
 
-Do NOT attempt a fix if:
-- The issue is too vague to understand what the fix should be.
-- The fix would require major architectural changes or is highly speculative.
-
 When creating a fix:
 1. **Follow `coding_guidelines`** from the repo config (loaded in Step 1). These define preferred APIs, patterns, and conventions for this codebase. Violations will be caught in code review.
 2. **Create the branch in the repo where the fix belongs**, not necessarily the issue's repo. Use `affected_repo` from Step 5 to determine this. For example, a `dotnet/diagnostics` issue whose root cause is in `dotnet/runtime` gets a fix branch in the runtime checkout. If the fix spans multiple repos, create branches in each.
-2. Branch name: `issue_<NUMBER>` (using the original issue number, even in a different repo).
-3. Make the fix, run targeted tests if possible.
-4. Record the fix details (summary, confidence, branch, diff) in the JSON. If the fix is in a different repo than the issue, note which repo the branch is in (e.g., `"branch": "issue_1837"`, `"fix_repo": "dotnet/runtime"`).
-5. Set `fix.confidence` lower for fixes without reproduction (e.g., 0.4–0.6 vs. 0.8+ for reproduced fixes).
-6. Push the branch to `origin` (the user's fork), NOT `upstream`. Do this for each repo where a branch was created.
-7. Do NOT include `Co-authored-by: Copilot` in fix commit messages — these are proposed fixes authored by the developer.
-8. **Use only standard US keyboard ASCII characters** in source code and code comments. Do not use em-dashes, smart quotes, or other Unicode punctuation in code. Use `--` instead of `—`, straight quotes instead of curly quotes, etc. This applies only to code changes, not to markdown reports or log entries.
-9. Return all repos to their main branches when done.
+3. Branch name: `issue_<NUMBER>` (using the original issue number, even in a different repo).
+4. Make the fix.
+5. **Run targeted tests** to validate the fix. Do NOT skip testing. Run the tests most relevant to the changed code. Avoid full test suites (they can take 50+ minutes), but always run *something*.
+6. Record the fix details (summary, confidence, branch, diff) in the JSON. If the fix is in a different repo than the issue, note which repo the branch is in (e.g., `"branch": "issue_1837"`, `"fix_repo": "dotnet/runtime"`).
+7. Set `fix.confidence` lower for fixes without reproduction (e.g., 0.4-0.6 vs. 0.8+ for reproduced fixes).
+8. Push the branch to `origin` (the user's fork), NOT `upstream`. Do this for each repo where a branch was created.
+9. Do NOT include `Co-authored-by: Copilot` in fix commit messages — these are proposed fixes authored by the developer.
+10. **Use only standard US keyboard ASCII characters** in source code and code comments. Do not use em-dashes, smart quotes, or other Unicode punctuation in code. Use `--` instead of `—`, straight quotes instead of curly quotes, etc. This applies only to code changes, not to markdown reports or log entries.
+11. Return all repos to their main branches when done.
 
-### Step 8: Write Reports
+### Step 8: Completion Self-Check
+
+**Before writing reports, verify you completed the full loop.** Answer each question:
+
+1. ✅ Did I **classify** the issue (category, status, area)?
+2. ✅ Did I **attempt reproduction**? If not, is the reason one of the valid skip conditions from Step 6?
+3. ✅ Did I **attempt a fix**? If not, is the reason one of the valid skip conditions from Step 7?
+4. ✅ Did I **run tests** on my fix? If I have a fix candidate but didn't test it, go back to Step 7.
+
+If you skipped reproduction or fixing, you MUST document the specific reason in the report. "I ran out of time" or "I focused on classification" are NOT valid reasons.
+
+### Step 9: Write Reports
 
 1. **Write JSON report** to `issues/<owner>-<repo>/<issue_number>/report.json`:
    - Follow the [JSON schema](references/json-schema.md).
@@ -164,7 +185,7 @@ When creating a fix:
    - Include a link to the captain's log: `[Log](log.md)`
    - Write atomically.
 
-### Step 9: Commit Results
+### Step 10: Commit Results
 
 1. Stage the new/updated files in the triage repo:
    - `issues/<owner>-<repo>/<issue_number>/report.json`
@@ -182,6 +203,9 @@ When creating a fix:
 - [ ] `report.json` is valid JSON matching the schema
 - [ ] `report.md` exists and has content
 - [ ] Session entry appended to `log.md`
+- [ ] Reproduction was attempted (or a valid skip reason is documented)
+- [ ] Fix was attempted (or a valid skip reason is documented)
+- [ ] Tests were run against any fix candidate
 - [ ] Sprint queue was updated (issue removed) if processing from queue
 - [ ] Source repos are back on main branch (all repos touched, not just the issue's repo)
 - [ ] Results committed to triage repo
@@ -190,6 +214,10 @@ When creating a fix:
 
 | Pitfall | Solution |
 |---------|----------|
+| Stopped after classification | Classification is Step 5 — you must continue through Steps 6-8 (reproduce, fix, self-check) |
+| Skipped repro without valid reason | Always attempt reproduction unless category is question/docs or status is terminal (already-fixed, stale, etc.) |
+| Skipped fix without valid reason | Always attempt a fix if root cause is understood or obvious from code inspection |
+| Fix candidate but no tests run | Always run targeted tests against your fix before writing reports |
 | Repo not in config | Run `add-repo` first |
 | No active sprint | Run `find-untriaged` to discover untriaged issues |
 | Left source repo on wrong branch | Always `git checkout main` in every repo touched when done |

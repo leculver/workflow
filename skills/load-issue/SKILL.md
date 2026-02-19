@@ -5,7 +5,7 @@ description: >
   says "load", "continue", or "pick up" an issue. Reads the existing JSON report, captain's log, reproduction
   artifacts, fix branches, and latest GitHub comments. Does NOT autonomously investigate — instead primes the
   conversation so the developer can ask followups, try things, and direct the investigation interactively.
-  Do NOT use when the user says "triage" or "work on" an issue — that is triage-issue.
+  Do NOT use when the user says "triage", "diagnose", "fix", "work on", or "investigate" an issue — that is diagnose-and-fix.
 ---
 
 # Continue Issue
@@ -20,9 +20,9 @@ Load all prior context for an issue and brief the developer for an interactive i
 
 ## When Not to Use
 
-- First-time triage of an issue (use `triage-issue`)
-- Batch processing (run `triage-issue` repeatedly)
-- Fully automated re-investigation (use `triage-issue` with the issue number)
+- First-time triage of an issue (use `diagnose-and-fix`)
+- Batch processing (run `diagnose-and-fix` repeatedly)
+- Fully automated re-investigation (use `diagnose-and-fix` with the issue number)
 
 ## Inputs
 

@@ -20,7 +20,7 @@ Discover open issues that have no triage report yet.
 
 ## When Not to Use
 
-- Batch processing (run `triage-issue` repeatedly for multiple issues)
+- Batch processing (run `diagnose-and-fix` repeatedly for multiple issues)
 - Checking status of already-triaged issues (use `triage-status`)
 
 ## Inputs
@@ -74,8 +74,8 @@ If the user asks for all, show the full list.
 ### Step 3: Suggest Next Steps
 
 Based on the results, suggest:
-- If few untriaged: "Run `triage-issue` on #NNNN to triage it"
-- If many untriaged: "Run `triage-issue` on each, or pick a subset to start with"
+- If few untriaged: "Run `diagnose-and-fix` on #NNNN to investigate it"
+- If many untriaged: "Run `diagnose-and-fix` on each, or pick a subset to start with"
 - If zero untriaged: "All caught up! 🎉"
 
 ## Validation

@@ -21,7 +21,7 @@ Build a comprehensive triage summary dashboard from all issue report data.
 ## When Not to Use
 
 - Querying status of a single issue (use `triage-status`)
-- Triaging issues (use `triage-issue`)
+- Triaging issues (use `diagnose-and-fix`)
 
 ## Inputs
 

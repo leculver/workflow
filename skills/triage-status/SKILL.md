@@ -21,7 +21,7 @@ Query and display the current state of triage work across sprints and repos.
 ## When Not to Use
 
 - Generating the full formatted summary dashboard (use `generate-summary`)
-- Triaging issues (use `triage-issue`)
+- Triaging issues (use `diagnose-and-fix`)
 
 ## Inputs
 

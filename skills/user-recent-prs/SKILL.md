@@ -19,7 +19,7 @@ Query GitHub for the authenticated user's recent pull requests and produce a mar
 ## When Not to Use
 
 - Searching for PRs by other authors (use GitHub search tools directly)
-- Triaging or investigating issues (use `triage-issue`)
+- Triaging or investigating issues (use `diagnose-and-fix`)
 
 ## Inputs
 

@@ -19,8 +19,8 @@ Check the health and readiness of all fix candidates in the triage system.
 
 ## When Not to Use
 
-- Creating fixes (use `triage-issue` or `load-issue`)
-- Triaging new issues (use `triage-issue`)
+- Creating fixes (use `diagnose-and-fix` or `load-issue`)
+- Triaging new issues (use `diagnose-and-fix`)
 
 ## Inputs
 
