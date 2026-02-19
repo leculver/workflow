@@ -216,7 +216,8 @@ Your job this iteration:
 4. Run the backpressure commands (build + test) from AGENTS.md.
 5. If tests fail, fix them before stopping.
 6. Mark the task as done in PLAN.md: `- [x] Task description`
-7. Add any operational learnings to the Notes section of PLAN.md.
+7. If you discover additional work needed, add new `- [ ]` tasks to PLAN.md.
+8. Add any operational learnings to the Notes section of PLAN.md.
 8. Commit with a clear message describing what was implemented.
 9. Append one progress line to .bookkeeping/<feature>.ralph/progress.log (see AGENTS.md for format).
 10. STOP. Do not continue to the next task.
