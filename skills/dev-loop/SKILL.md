@@ -245,12 +245,69 @@ param(
 $ErrorActionPreference = "Stop"
 $RalphDir = $PSScriptRoot
 $RepoRoot = Resolve-Path (Join-Path $RalphDir "..\..")
+$RepoName = Split-Path $RepoRoot -Leaf
+$Feature = (Split-Path $RalphDir -Leaf) -replace '\.ralph$', ''
 $PlanFile = Join-Path $RalphDir "PLAN.md"
 $PromptFile = Join-Path $RalphDir "PROMPT.md"
 $LogFile = Join-Path $RalphDir "ralph.log"
+$ProgressFile = Join-Path $RalphDir "progress.log"
 $TestCmd = "<test_cmd>"
 $PlanSentinel = "STATUS: COMPLETE"
 $PlanReadySentinel = "STATUS: PLAN_COMPLETE"
+$WorkRepo = "<work_repo_root>"
+
+function Save-LoopNote {
+    param([string]$Outcome)
+    $date = Get-Date -Format "yyyy_MM_dd"
+    $notesDir = Join-Path $WorkRepo "notes" $RepoName
+    if (-not (Test-Path $notesDir)) { New-Item -ItemType Directory -Path $notesDir -Force | Out-Null }
+    $noteFile = Join-Path $notesDir "${date}_${Feature}.md"
+
+    $sb = [System.Text.StringBuilder]::new()
+    [void]$sb.AppendLine("# Dev Loop: $Feature")
+    [void]$sb.AppendLine("")
+    [void]$sb.AppendLine("**Repo:** $RepoName  ")
+    [void]$sb.AppendLine("**Outcome:** $Outcome  ")
+    [void]$sb.AppendLine("**Date:** $(Get-Date -Format 'yyyy-MM-dd HH:mm')")
+    [void]$sb.AppendLine("")
+
+    # Progress log
+    if (Test-Path $ProgressFile) {
+        [void]$sb.AppendLine("## Iteration Log")
+        [void]$sb.AppendLine("")
+        foreach ($line in Get-Content $ProgressFile) {
+            [void]$sb.AppendLine("- $line")
+        }
+        [void]$sb.AppendLine("")
+    }
+
+    # Plan summary
+    if (Test-Path $PlanFile) {
+        [void]$sb.AppendLine("## Final Plan State")
+        [void]$sb.AppendLine("")
+        $planContent = Get-Content $PlanFile -Raw
+        # Extract tasks section
+        if ($planContent -match '(?s)## Tasks(.+?)(?=\n## |\z)') {
+            [void]$sb.AppendLine($Matches[1].Trim())
+        }
+        [void]$sb.AppendLine("")
+    }
+
+    Set-Content -Path $noteFile -Value $sb.ToString().TrimEnd()
+    Write-Host "📝 Note saved: $noteFile"
+
+    # Commit and push from work repo
+    Push-Location $WorkRepo
+    try {
+        git add "notes/$RepoName" 2>$null
+        git commit -m "notes/${RepoName}: ${Feature}" --quiet 2>$null
+        git push --quiet 2>$null
+        Write-Host "📤 Pushed to work repo."
+    } catch {
+        Write-Host "⚠️ Could not commit/push note. Save it manually."
+    }
+    Pop-Location
+}
 
 Push-Location $RepoRoot
 $env:COPILOT_CUSTOM_INSTRUCTIONS_DIRS = $RalphDir
@@ -268,7 +325,7 @@ try {
         # Run the CLI
         switch ($Cli) {
             "copilot" {
-                $output = & copilot -p $prompt --yolo 2>&1 | Tee-Object -Append -FilePath $LogFile
+                $output = & copilot -p $prompt --yolo --model claude-opus-4.6 2>&1 | Tee-Object -Append -FilePath $LogFile
             }
             "claude" {
                 $output = & claude -p $prompt --dangerously-skip-permissions 2>&1 | Tee-Object -Append -FilePath $LogFile
@@ -284,6 +341,7 @@ try {
             if ($planContent -match [regex]::Escape($PlanSentinel)) {
                 Write-Host "`n✅ Plan marked COMPLETE. Stopping."
                 Add-Content -Path $LogFile -Value "`n✅ Completed at iteration $i"
+                Save-LoopNote "✅ Completed ($i iterations)"
                 exit 0
             }
             # In BOTH mode: transition from planning to building
@@ -318,6 +376,7 @@ try {
 
     Write-Host "`n❌ Max iterations ($MaxIters) reached without completion."
     Add-Content -Path $LogFile -Value "`n❌ Max iterations reached"
+    Save-LoopNote "❌ Max iterations ($MaxIters) reached"
     exit 1
 } finally {
     Pop-Location
@@ -341,12 +400,59 @@ CLI="${3:-<cli>}"
 
 RALPH_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$RALPH_DIR/../.." && pwd)"
+REPO_NAME="$(basename "$REPO_ROOT")"
+FEATURE="$(basename "$RALPH_DIR" .ralph)"
 PLAN_FILE="$RALPH_DIR/PLAN.md"
 PROMPT_FILE="$RALPH_DIR/PROMPT.md"
 LOG_FILE="$RALPH_DIR/ralph.log"
+PROGRESS_FILE="$RALPH_DIR/progress.log"
 TEST_CMD="<test_cmd>"
 PLAN_SENTINEL="STATUS: COMPLETE"
 PLAN_READY_SENTINEL="STATUS: PLAN_COMPLETE"
+WORK_REPO="<work_repo_root>"
+
+save_note() {
+    local outcome="$1"
+    local date_slug
+    date_slug=$(date "+%Y_%m_%d")
+    local notes_dir="$WORK_REPO/notes/$REPO_NAME"
+    mkdir -p "$notes_dir"
+    local note_file="$notes_dir/${date_slug}_${FEATURE}.md"
+
+    {
+        echo "# Dev Loop: $FEATURE"
+        echo ""
+        echo "**Repo:** $REPO_NAME  "
+        echo "**Outcome:** $outcome  "
+        echo "**Date:** $(date '+%Y-%m-%d %H:%M')"
+        echo ""
+
+        if [ -f "$PROGRESS_FILE" ]; then
+            echo "## Iteration Log"
+            echo ""
+            while IFS= read -r line; do
+                echo "- $line"
+            done < "$PROGRESS_FILE"
+            echo ""
+        fi
+
+        if [ -f "$PLAN_FILE" ]; then
+            echo "## Final Plan State"
+            echo ""
+            sed -n '/^## Tasks/,/^## /{ /^## Tasks/d; /^## [^T]/d; p; }' "$PLAN_FILE"
+            echo ""
+        fi
+    } > "$note_file"
+
+    echo "📝 Note saved: $note_file"
+
+    # Commit and push from work repo
+    cd "$WORK_REPO" || return
+    git add "notes/$REPO_NAME" 2>/dev/null
+    git commit -m "notes/${REPO_NAME}: ${FEATURE}" --quiet 2>/dev/null
+    git push --quiet 2>/dev/null && echo "📤 Pushed to work repo." || echo "⚠️ Could not push note."
+    cd "$REPO_ROOT"
+}
 
 cd "$REPO_ROOT"
 export COPILOT_CUSTOM_INSTRUCTIONS_DIRS="$RALPH_DIR"
@@ -365,7 +471,7 @@ for i in $(seq 1 "$MAX_ITERS"); do
     # Run the CLI
     case "$CLI" in
         copilot)
-            copilot -p "$PROMPT" --yolo 2>&1 | tee -a "$LOG_FILE"
+            copilot -p "$PROMPT" --yolo --model claude-opus-4.6 2>&1 | tee -a "$LOG_FILE"
             ;;
         claude)
             claude -p "$PROMPT" --dangerously-skip-permissions 2>&1 | tee -a "$LOG_FILE"
@@ -379,6 +485,7 @@ for i in $(seq 1 "$MAX_ITERS"); do
     if [ -f "$PLAN_FILE" ]; then
         if grep -Fq "$PLAN_SENTINEL" "$PLAN_FILE"; then
             echo -e "\n✅ Plan marked COMPLETE. Stopping." | tee -a "$LOG_FILE"
+            save_note "✅ Completed ($i iterations)"
             exit 0
         fi
         # In BOTH mode: transition from planning to building
@@ -405,6 +512,7 @@ for i in $(seq 1 "$MAX_ITERS"); do
 done
 
 echo -e "\n❌ Max iterations ($MAX_ITERS) reached without completion." | tee -a "$LOG_FILE"
+save_note "❌ Max iterations ($MAX_ITERS) reached"
 exit 1
 ```
 
