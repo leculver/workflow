@@ -50,11 +50,11 @@ Invoke `bookkeeping` to pull the triage repo and flush any pending `.progress/` 
 
 **Fork detection:** Check if the GitHub repo has a `parent` field (meaning it's a fork).
 
-- **If the repo IS a fork** (e.g., user provided `leculver/runtime` which is a fork of `dotnet/runtime`):
-  Stop and ask the user: *"leculver/runtime is a fork of dotnet/runtime. Did you mean to add dotnet/runtime? If you add your fork directly, upstream won't be configured and tools will treat it as the canonical repo. Confirm you want to add the fork itself, or switch to dotnet/runtime."*
+- **If the repo IS a fork** (e.g., user provided `<username>/runtime` which is a fork of `dotnet/runtime`):
+  Stop and ask the user: *"`<username>/runtime` is a fork of `dotnet/runtime`. Did you mean to add `dotnet/runtime`? If you add your fork directly, upstream won't be configured and tools will treat it as the canonical repo. Confirm you want to add the fork itself, or switch to `dotnet/runtime`."*
   If the user confirms the fork, proceed in **personal mode** (no upstream). If they switch, restart with the parent repo.
 
-- **If the repo owner matches the user's login** (e.g., `leculver/my-tool`):
+- **If the repo owner matches the user's login** (e.g., `<username>/my-tool`):
   This is a **personal repo**. Proceed in **personal mode** — `origin` points to this repo directly, no `upstream` remote, no fork needed.
 
 - **Otherwise** (e.g., `dotnet/runtime`, `microsoft/clrmd`):
@@ -201,12 +201,12 @@ Ready! Run: "set up a sprint for dotnet/runtime"
 
 **Personal mode:**
 ```
-Repository configured: leculver/my-tool (personal mode)
+Repository configured: <username>/my-tool (personal mode)
   Local path: ./my-tool
-  Origin: leculver/my-tool
+  Origin: <username>/my-tool
   Areas: 3 auto-detected from labels
 
-Ready! Run: "set up a sprint for leculver/my-tool"
+Ready! Run: "set up a sprint for <username>/my-tool"
 ```
 
 ## Validation
