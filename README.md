@@ -169,7 +169,7 @@ in one repo often has its root cause or fix in another.
 
 ```gitignore
 # In-progress investigation notes — local only, flushed by bookkeeping
-.progress/
+.bookkeeping/
 
 # Local config — machine-specific
 config/local-tools.json

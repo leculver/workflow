@@ -53,7 +53,7 @@ mkdir -p .github config issues summaries notes
 
 Write `.gitignore` with these rules (see the example in README.md for the full template):
 
-- `.progress/` — in-progress notes (flushed by bookkeeping)
+- `.bookkeeping/` — in-progress notes (flushed by bookkeeping) and deletion reminders
 - `config/local-tools.json` and `config/user.json` — machine-specific
 - Dump files (`*.dmp`, `*.crashreport.json`, `dumps/`)
 - Trace files (`*.nettrace`, `*.etl`, `*.perfcollect`)

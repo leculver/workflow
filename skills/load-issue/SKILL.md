@@ -36,7 +36,7 @@ Load all prior context for an issue and brief the developer for an interactive i
 
 ### Step 0: Bookkeeping
 
-Invoke `bookkeeping` to pull the triage repo and flush any pending `.progress/` from prior sessions.
+Invoke `bookkeeping` to pull the triage repo and flush any pending `.bookkeeping/` logs from prior sessions.
 
 ### Step 1: Locate and Load Prior Work
 
@@ -124,8 +124,8 @@ Follow the developer's lead. When they ask you to do something, do it and report
 
 **Ongoing progress capture:** As you work, periodically append findings to a progress file:
 
-1. Create `issues/<owner>-<repo>/<issue_number>/.progress/` if it doesn't exist.
-2. At the start of the session, create a file named `<ISO-8601-timestamp>.md` (e.g., `2026-02-17T13-30-00Z.md`).
+1. Create `issues/<owner>-<repo>/<issue_number>/.bookkeeping/` if it doesn't exist.
+2. At the start of the session, create a file named `<ISO-8601-timestamp>.log` (e.g., `2026-02-17T13-30-00Z.log`).
 3. Append to this file as you go — key findings, commands run, code read, conclusions reached. Write in the same style as a captain's log entry.
 4. **If your progress file disappears** (renamed by `bookkeeping` flushing from another session), create a new one with a fresh timestamp and continue. The prior content was already captured.
 5. This file is gitignored and local-only. It exists as a safety net so that if the session ends without an explicit save, the next `bookkeeping` run will flush it into `log.md`.

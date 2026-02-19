@@ -47,7 +47,7 @@ Instead:
 
 ### Step 0: Bookkeeping
 
-Invoke `bookkeeping` to pull the triage repo and flush any pending `.progress/` from prior sessions.
+Invoke `bookkeeping` to pull the triage repo and flush any pending `.bookkeeping/` logs from prior sessions.
 
 ### Step 1: Select Repository
 

@@ -1,14 +1,15 @@
 ---
 name: bookkeeping
 description: >
-  Flushes in-progress investigation notes (.progress/) into captain's logs and reports, and pulls the
-  triage repo. Called by other skills at startup, or standalone via "clean up", "flush progress", or
-  "bookkeeping". Handles concurrent sessions gracefully via rename-before-flush.
+  Flushes in-progress investigation notes (.bookkeeping/) into captain's logs and reports, checks
+  deletion reminders, and pulls the triage repo. Called by other skills at startup, or standalone
+  via "clean up", "flush progress", or "bookkeeping". Handles concurrent sessions gracefully via
+  rename-before-flush.
 ---
 
 # Bookkeeping
 
-Pull the triage repo, then scan for and flush any `.progress/` directories across all issues.
+Pull the triage repo, run the bookkeeping processor, flush logs, and check deletion reminders.
 
 ## When to Use
 
@@ -40,50 +41,68 @@ Pull the triage repo, then scan for and flush any `.progress/` directories acros
 
 This file is gitignored (machine-specific) and provides the GitHub username for skills that need it (e.g., generate-summary filters PRs by author).
 
-### Step 2: Scan for .progress/ Directories
+### Step 2: Run Bookkeeping Processor
 
-1. Glob for `issues/*/.progress/*.md` across all issue directories (or filtered to `repo` if provided).
-2. If none found, stop — nothing to flush. Report "No pending progress to flush."
+Run the Python script to scan for `.log` and `.delete` files in one pass:
 
-### Step 3: Flush Each Issue's Progress
+```
+python .agents/skills/bookkeeping/scripts/bookkeeping.py <repo_root> [--issues-only <owner-repo>]
+```
 
-For each issue directory that has a `.progress/` folder with `.md` files:
+Pass `--issues-only <owner-repo>` if `repo` input was provided (converted to `owner-repo` format with hyphen).
 
-**a) Claim the files (rename before reading):**
+The script handles:
+- **`.log` files** in per-issue `.bookkeeping/` directories — renames to `.flushing.log` (claim-before-read), reads content, returns structured data.
+- **`.delete` files** in root `.bookkeeping/` — checks for expired deletion reminders and returns any that are past due.
 
-For each `.md` file in `.progress/`:
-1. Rename it from `<name>.md` to `<name>.flushing.md`.
-2. If the rename fails (file doesn't exist), another session already claimed it. Skip it silently.
+The script outputs JSON to stdout with two sections: `logs` and `expired_deletions`.
 
-**b) Read and aggregate:**
+### Step 3: Process Log Results
 
-1. Read all `.flushing.md` files in chronological order (sort by filename, which is timestamp-based).
-2. Combine their contents into a single session block.
+If the script returned any `logs` entries:
 
-**c) Append to captain's log:**
+For each issue in the `logs` array:
+
+**a) Append to captain's log:**
 
 1. Read the existing `log.md` for this issue.
 2. Append a new session entry:
    ```markdown
-   ## <current ISO 8601 timestamp> — <platform> — flushed from .progress/
+   ## <current ISO 8601 timestamp> — <platform> — flushed from .bookkeeping/
 
-   <combined contents of all .flushing.md files, in order>
+   <combined contents of all .log files for this issue, in chronological order>
    ```
 3. Write `log.md`.
 
-**d) Update report.json if applicable:**
+**b) Update report.json if applicable:**
 
 1. Read the existing `report.json`.
-2. If any `.flushing.md` file contains structured updates (status changes, new observations, fix info), apply them.
+2. If any log file contains structured updates (status changes, new observations, fix info), apply them.
 3. Most progress notes are freeform — don't force-parse them. Only update `report.json` if there are clear, explicit status changes noted in the progress.
 4. Write atomically (`.tmp` then rename).
 
-**e) Clean up:**
+**c) Clean up:**
 
-1. Delete all `.flushing.md` files.
-2. If `.progress/` is now empty, leave the empty directory (it's gitignored anyway).
+1. Delete all `.flushing.log` files (paths are in the script output).
+2. If `.bookkeeping/` is now empty, leave the empty directory (it's gitignored anyway).
 
-### Step 4: Commit
+### Step 4: Process Deletion Reminders
+
+If the script returned any `expired_deletions` entries:
+
+For each expired item, **ask the user** whether to delete it. Present:
+- The path to the file/directory
+- When it was ingested (`ingested_at`)
+- When the reminder was due (`delete_after`)
+
+Based on the user's response:
+- **Delete**: Remove the file/directory and remove the entry from the corresponding `.delete` file in `.bookkeeping/`.
+- **Extend**: Ask how long to extend, update `delete_after` in the `.delete` file.
+- **Skip**: Do nothing — the reminder will fire again next time bookkeeping runs.
+
+**Important:** Do NOT delete files without asking. This is a reminder system, not enforcement.
+
+### Step 5: Commit
 
 If any log.md or report.json files were updated:
 
@@ -97,25 +116,50 @@ Do NOT include `Co-authored-by: Copilot` in commit messages.
 
 Multiple Copilot sessions may be running simultaneously. The rename-before-flush pattern provides lightweight coordination:
 
-- **Writer (load-issue):** Appends to `.progress/<timestamp>.md`. If the file disappeared (was renamed by a flush), the writer should create a new `.progress/<new-timestamp>.md` and continue. No data is lost — the old content was already claimed by the flusher.
-- **Flusher (this skill):** Renames `.md` → `.flushing.md` before reading. If the rename fails, another flusher got there first. Skip and move on.
+- **Writer (load-issue):** Appends to `.bookkeeping/<timestamp>.log`. If the file disappeared (was renamed by a flush), the writer should create a new `.bookkeeping/<new-timestamp>.log` and continue. No data is lost — the old content was already claimed by the flusher.
+- **Flusher (this skill):** The Python script renames `.log` → `.flushing.log` before reading. If the rename fails, another flusher got there first. Skip and move on.
 - **No locking required.** Worst case: a progress note written between rename and delete is lost. This is acceptable — these are investigation notes, not transactions.
-- **Partial flushes are fine.** If this skill crashes mid-flush, `.flushing.md` files remain on disk. The next bookkeeping run will pick them up and finish the job.
+- **Partial flushes are fine.** If this skill crashes mid-flush, `.flushing.log` files remain on disk. The next bookkeeping run will pick them up and finish the job.
+
+## `.delete` File Format
+
+`.delete` files live in the root `.bookkeeping/` directory (e.g., `.bookkeeping/dumps.delete`). Each is a JSON array of tracked items:
+
+```json
+[
+  {
+    "path": "D:\\git\\work\\dumps\\2026-02-19_crash-analysis.dmp",
+    "ingested_at": "2026-02-19T16:00:00Z",
+    "file_timestamp": "2026-02-18T10:30:00Z",
+    "delete_after": "2026-03-19T16:00:00Z"
+  }
+]
+```
+
+Fields:
+- `path` — absolute path to the file or directory to delete
+- `ingested_at` — when the item was added to tracking
+- `file_timestamp` — creation/modification time of the file at time of ingestion
+- `delete_after` — timestamp after which the reminder fires (checked by the Python script)
+
+Items with no `delete_after` (retained forever) should not be added to `.delete` files at all.
 
 ## Validation
 
-- [ ] All `.progress/*.md` files were renamed before reading
+- [ ] All `.bookkeeping/*.log` files were renamed before reading (handled by Python script)
 - [ ] Contents appended to `log.md` (not overwriting prior entries)
-- [ ] `.flushing.md` files deleted after successful append
+- [ ] `.flushing.log` files deleted after successful append
+- [ ] Expired deletion reminders presented to user (not auto-deleted)
 - [ ] Changes committed and pushed
-- [ ] No interference with concurrent sessions writing to .progress/
+- [ ] No interference with concurrent sessions writing to .bookkeeping/
 
 ## Common Pitfalls
 
 | Pitfall | Solution |
 |---------|----------|
-| File disappeared during rename | Another session flushed it — skip silently |
-| `.flushing.md` files left behind from crash | Pick them up on next run — they're already claimed |
+| File disappeared during rename | Another session flushed it — skip silently (handled by script) |
+| `.flushing.log` files left behind from crash | Pick them up on next run — they're already claimed |
 | Overwriting log.md | Always append, never overwrite |
-| Committing .progress/ files | `.progress/` is in `.gitignore` — only `log.md` and `report.json` are committed |
+| Committing .bookkeeping/ files | `.bookkeeping/` is in `.gitignore` — only `log.md` and `report.json` are committed |
 | Large number of issues with progress | Batch commits if flushing more than 3 issues |
+| Auto-deleting expired files | NEVER auto-delete — always ask the user first |

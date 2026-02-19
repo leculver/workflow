@@ -36,7 +36,7 @@ Query and display the current state of triage work across sprints and repos.
 
 ### Step 0: Bookkeeping
 
-Invoke `bookkeeping` to pull the triage repo and flush any pending `.progress/` from prior sessions.
+Invoke `bookkeeping` to pull the triage repo and flush any pending `.bookkeeping/` logs from prior sessions.
 
 ### Step 1: Gather Data
 
