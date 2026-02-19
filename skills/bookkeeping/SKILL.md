@@ -32,6 +32,14 @@ Pull the triage repo, then scan for and flush any `.progress/` directories acros
 1. `git fetch` and `git pull` in the triage repo root.
 2. If you have already done this earlier in the session (or remember doing so), skip this step.
 
+### Step 1.5: Ensure config/user.json
+
+1. Check if `config/user.json` exists in the triage repo root.
+2. If missing, generate it by running: `gh api user --jq '{login: .login, name: .name}'` and writing the output to `config/user.json`.
+3. If it already exists, skip this step.
+
+This file is gitignored (machine-specific) and provides the GitHub username for skills that need it (e.g., generate-summary filters PRs by author).
+
 ### Step 2: Scan for .progress/ Directories
 
 1. Glob for `issues/*/.progress/*.md` across all issue directories (or filtered to `repo` if provided).

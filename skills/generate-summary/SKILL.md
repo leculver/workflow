@@ -71,7 +71,7 @@ Invoke `bookkeeping` to pull the triage repo and flush any pending `.progress/` 
 
 ### Step 3: Fetch Open PRs
 
-1. Use GitHub MCP tools: `search_pull_requests` for the repo, state=open, author=leculver, perPage=100.
+1. Read the GitHub username from `config/user.json` (the `login` field). Use GitHub MCP tools: `search_pull_requests` for the repo, state=open, author=`<login>`, perPage=100.
 2. Extract PR number, title, author, html_url.
 3. Parse PR bodies AND titles for linked issues using ALL these patterns:
    - `fixes #N`, `closes #N`, `resolves #N` (case-insensitive)
@@ -122,7 +122,7 @@ Column details:
 Include before the issue sections (in this order):
 1. **Overview stats table**: Total issues, open/closed counts, fix candidates, manually investigated, by-status breakdown.
 2. **Changes Since Last Summary**: What's new since the prior summary (only if a prior summary exists). See Step 5.
-3. **Open Pull Requests table**: Open PRs authored by leculver with linked issues.
+3. **Open Pull Requests table**: Open PRs authored by the configured user (from `config/user.json`) with linked issues.
 
 See [summary format reference](references/summary-format.md) for the full template.
 

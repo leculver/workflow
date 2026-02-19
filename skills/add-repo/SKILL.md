@@ -110,7 +110,7 @@ The local checkout must follow the fork workflow convention:
 1. **`upstream`** must point to the target repo (the `owner/repo` being triaged).
    - e.g., `upstream = https://github.com/dotnet/diagnostics.git`
 2. **`origin`** must point to a **different** repo (the user's fork).
-   - e.g., `origin = https://github.com/leculver/diagnostics.git`
+   - e.g., `origin = https://github.com/<username>/diagnostics.git` (the user's fork)
 3. `origin` and `upstream` must NOT be the same URL.
 
 **Validation steps:**

@@ -51,8 +51,14 @@ def main():
         config = json.load(f)
     areas_config = config["repos"][full_repo].get("areas", {})
 
-    # Build PR -> issue map (only include PRs from leculver)
-    prs = [pr for pr in prs if pr.get("author", "").lower() == "leculver"]
+    # Load user config for PR author filtering
+    user_config_path = os.path.join(base, "config", "user.json")
+    with open(user_config_path, "r", encoding="utf-8") as f:
+        user_config = json.load(f)
+    username = user_config["login"].lower()
+
+    # Build PR -> issue map (only include PRs from the configured user)
+    prs = [pr for pr in prs if pr.get("author", "").lower() == username]
     issue_to_prs = {}
     for pr in prs:
         for iss in pr.get("linked_issues", []):
