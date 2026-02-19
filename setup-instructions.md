@@ -1,6 +1,23 @@
 # Setup Instructions
 
-You are setting up a new issue triage workspace. Follow these steps exactly.
+You are setting up a new issue triage workspace. The `.agents/` directory should be the user's **fork** of the workflow repo — they own it and can modify skills freely. Follow these steps exactly.
+
+## Step 0: Verify .agents/ is a Fork
+
+Before anything else, check that `.agents/` is the user's fork, not a direct clone of the upstream repo.
+
+1. Run `git -C .agents remote get-url origin` to get the origin URL.
+2. If origin points to `leculver/workflow` (the upstream repo), this is a direct clone — not a fork. Tell the user:
+
+   > ".agents/ is cloned directly from leculver/workflow. You should fork it instead so you own your copy and can push skill modifications. Want me to fix this?"
+
+   If the user agrees:
+   1. Fork the repo: `gh repo fork leculver/workflow --clone=false`
+   2. Update origin to point to the fork: `git -C .agents remote set-url origin git@github.com:<username>/workflow.git`
+   3. Add upstream for pulling updates: `git -C .agents remote add upstream git@github.com:leculver/workflow.git`
+   4. Verify: `git -C .agents remote -v`
+
+3. If origin already points to `<username>/workflow`, this is correctly a fork. Continue.
 
 ## Step 1: Initialize the Triage Repo
 
@@ -96,9 +113,6 @@ Report the results and suggest next steps:
 ```
 Workspace is ready!
 
-If you found this useful, consider starring the workflow repo to help others find it:
-  gh repo star leculver/workflow
-
 Try:
   "find untriaged issues in <owner>/<repo>"
   "diagnose issue #<number>"
@@ -107,6 +121,7 @@ Try:
 
 ## Important Notes
 
-- The `.agents/` directory is a separate git repo (this one). Do NOT `git add .agents/` in the triage repo — it's its own clone.
+- The `.agents/` directory is the user's fork of the workflow repo. It has its own git history. Do NOT `git add .agents/` in the triage repo — it's a separate clone.
+- Skill modifications are committed and pushed to the user's fork of the workflow repo, not to the triage repo.
 - All skills read the GitHub username from `config/user.json`, never hardcode it.
 - The `bookkeeping` skill runs automatically at the start of other skills. It pulls the triage repo and regenerates `config/user.json` if missing.

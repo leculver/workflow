@@ -14,6 +14,12 @@ This workflow turns Copilot into an issue triage assistant. Point it at a GitHub
 
 The system is designed for cross-repo investigation. An issue filed in one repo often has its root cause or fix in another — the workflow handles that naturally.
 
+## Maintaining Your Own Copy
+
+**Fork this repo.** You are expected to own and maintain your copy of these skills. As you use them, you'll want to tweak prompts, add new skills, adjust workflows to your style, and evolve the system alongside your work. That's the intended workflow — these skills are a starting point, not a managed service.
+
+Issues and discussions are welcome if you find bugs or have ideas, but this repo does not accept pull requests.
+
 ## Skills
 
 | Skill | Description |
@@ -34,20 +40,22 @@ The system is designed for cross-repo investigation. An issue filed in one repo 
 
 ## Quick Start
 
-### 1. Create a workspace and clone
+### 1. Fork and clone
+
+Fork this repo on GitHub, then set up your workspace:
 
 **Linux / macOS:**
 ```bash
-mkdir my-triage && cd my-triage
+mkdir work && cd work
 git init
-git clone git@github.com:leculver/workflow.git .agents
+git clone git@github.com:<your-username>/workflow.git .agents
 ```
 
 **Windows (PowerShell):**
 ```powershell
-mkdir my-triage; cd my-triage
+mkdir work; cd work
 git init
-git clone git@github.com:leculver/workflow.git .agents
+git clone git@github.com:<your-username>/workflow.git .agents
 ```
 
 ### 2. Let Copilot set up the rest
@@ -63,6 +71,7 @@ copilot -p (Get-Content .agents/setup-instructions.md -Raw)
 ```
 
 This will walk you through:
+- Creating a private `work` repo for your triage data
 - Creating the directory structure and config files
 - Adding your first repository to triage
 - Setting up git remotes and `.gitignore`
@@ -79,14 +88,14 @@ This will walk you through:
 
 ### Repo Structure
 
-The triage workspace is a private git repo that holds your investigation data. The `.agents/` directory (this repo) is cloned into it and provides the Copilot skills.
+The triage workspace is a **separate, private** git repo (suggested name: `work`) that holds your investigation data. The `.agents/` directory is your fork of this workflow repo, cloned into the workspace.
 
 ```
-my-triage/                          # Your private triage repo
-├── .agents/                        # ← This repo (cloned here)
-│   └── skills/                     #    Copilot skill definitions
+work/                                   # Your private triage repo
+├── .agents/                            # ← Your fork of the workflow repo (cloned here)
+│   └── skills/                         #    Copilot skill definitions — yours to modify
 ├── .github/
-│   └── copilot-instructions.md     #    Tells Copilot about the workspace
+│   └── copilot-instructions.md         #    Tells Copilot about the workspace
 ├── config/
 │   ├── repos.json                  #    Which repos you're triaging
 │   ├── user.json                   #    Your GitHub identity (auto-generated, gitignored)
