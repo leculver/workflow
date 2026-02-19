@@ -206,7 +206,7 @@ Context:
 - Plan: .bookkeeping/<feature>.ralph/PLAN.md
 
 Your job each iteration:
-1. Read PLAN.md and pick the highest-priority incomplete task.
+1. Read PLAN.md and pick the next appropriate incomplete task. Tasks are listed in suggested order but you may reorder based on dependencies, complexity, or what makes sense given the current state of the code.
 2. Investigate relevant code — do NOT assume files are missing without checking.
 3. Implement the task.
 4. Run the backpressure commands (build + test) from AGENTS.md.
