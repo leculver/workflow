@@ -45,7 +45,7 @@ Each iteration of the loop:
 | cli | No | AI CLI to use: `copilot` (default), `claude`, `codex`, `opencode`, `goose`. |
 | mode | No | `PLANNING`, `BUILDING`, or `BOTH` (default). |
 | test_cmd | No | Backpressure command (e.g., `dotnet test`, `npm test`). Infer from repo if possible. |
-| max_iters | No | Maximum loop iterations. Default: 10. |
+| max_iters | No | Maximum loop iterations. Default: 100. |
 
 ## Workflow
 
@@ -68,7 +68,7 @@ Gather the inputs listed above. For anything not provided:
    - Go → `go test ./...`
    - Python → `pytest`
    - If unsure, ask.
-7. **max_iters** — default to 10.
+7. **max_iters** — default to 100.
 
 ### Step 2: Create the Workspace
 
