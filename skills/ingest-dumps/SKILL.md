@@ -39,13 +39,13 @@ Invoke `bookkeeping` to pull the triage repo and flush any pending `.bookkeeping
 
 ### Step 1: Detect Dump Files
 
-Run the detection script on the user-provided path:
+**CRITICAL: Always use the detection script. Do NOT manually list files, check extensions, or use Get-ChildItem/ls/dir to find dumps.** The script performs header-based binary inspection that cannot be replicated by looking at file names or extensions.
 
 ```
 python .agents/skills/ingest-dumps/scripts/detect_dumps.py <path>
 ```
 
-The script inspects file headers and returns a JSON array of absolute paths to valid dump files (Windows minidump, ELF core, Mach-O core).
+This is the **first thing you do** after bookkeeping — before asking the user anything, before listing directory contents, before any other file operations. The script accepts a file or directory, inspects binary headers, and returns a JSON array of absolute paths to valid dump files (Windows minidump, ELF core, Mach-O core).
 
 If no dump files are detected, tell the user and stop.
 
@@ -139,6 +139,7 @@ Report to the user:
 | Pitfall | Solution |
 |---------|----------|
 | File isn't actually a dump | The detection script checks headers — don't skip it |
+| Listing files manually instead of using script | NEVER use Get-ChildItem/ls/dir — always run detect_dumps.py first |
 | Missing `.dmp` extension | Always rename to `.dmp` regardless of original extension |
 | Forgetting HBI reminder | Always mention data retention policy when asking for retention period |
 | Auto-deleting dumps | NEVER auto-delete — the system only reminds |
