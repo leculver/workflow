@@ -209,6 +209,10 @@ IMPORTANT: Complete exactly ONE task per iteration, then STOP. The loop script w
 invoke you again for the next task. This ensures each task gets its own commit,
 its own backpressure check, and the operator can monitor progress between iterations.
 
+When implementing a task that adds testable logic (models, services, renderers, handlers),
+you should also write unit tests for it in the same iteration. Tests are a natural part of
+completing a task, not a separate step. If the test project doesn't exist yet, create it first.
+
 Your job this iteration:
 1. Read PLAN.md and pick ONE incomplete task. Tasks are listed in suggested order but you may reorder based on dependencies, complexity, or what makes sense given the current state of the code.
 2. Investigate relevant code — do NOT assume files are missing without checking.
