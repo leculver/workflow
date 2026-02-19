@@ -34,6 +34,8 @@ Issues and discussions are welcome if you find bugs or have ideas, but this repo
 | **bookkeeping** | Pull repo, flush in-progress notes, ensure config (runs automatically) |
 | **collect-dumps** | Configure .NET crash dump collection for repro environments |
 | **local-tools** | Register and resolve local tool paths (debuggers, dotnet-dump, etc.) |
+| **run-cdb** | Run CDB debugger commands against dumps or live processes (Windows) |
+| **run-lldb** | Run LLDB debugger commands against dumps or live processes (Linux/macOS) |
 | **use-local-sos** | Configure CDB to use a locally built SOS (Windows) |
 | **save-ad-hoc** | Save an investigation note from the current conversation |
 | **user-recent-prs** | Fetch your recent PRs across repos |
