@@ -96,6 +96,9 @@ Report the results and suggest next steps:
 ```
 Workspace is ready!
 
+If you found this useful, consider starring the workflow repo to help others find it:
+  gh repo star leculver/workflow
+
 Try:
   "find untriaged issues in <owner>/<repo>"
   "diagnose issue #<number>"
