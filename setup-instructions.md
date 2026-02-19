@@ -125,3 +125,64 @@ Try:
 - Skill modifications are committed and pushed to the user's fork of the workflow repo, not to the triage repo.
 - All skills read the GitHub username from `config/user.json`, never hardcode it.
 - The `bookkeeping` skill runs automatically at the start of other skills. It pulls the triage repo and regenerates `config/user.json` if missing.
+
+## Migrating an Existing Workspace
+
+If the user already has a triage workspace with `.agents/` committed as a regular directory (not a separate clone), follow these steps to migrate it.
+
+### 1. Remove .agents/ from the triage repo's git tracking
+
+```bash
+git rm -r --cached .agents
+echo ".agents/" >> .gitignore
+git add .gitignore
+git commit -m "Stop tracking .agents/ — moving to separate fork"
+git push
+```
+
+This removes `.agents/` from git tracking but leaves the files on disk.
+
+### 2. Delete the old directory and clone the fork
+
+```bash
+rm -rf .agents
+git clone git@github.com:<username>/workflow.git .agents
+```
+
+On Windows (PowerShell):
+```powershell
+Remove-Item -Recurse -Force .agents
+git clone git@github.com:<username>/workflow.git .agents
+```
+
+### 3. Verify
+
+1. `git -C .agents remote -v` — origin should point to the user's fork
+2. `git status` in the triage repo — `.agents/` should not appear (it's gitignored)
+3. Skills should work as before
+
+### 4. Ensure config/user.json exists
+
+```bash
+gh api user --jq '{login: .login, name: .name}' > config/user.json
+```
+
+If `config/user.json` is not in `.gitignore`, add it:
+```bash
+echo "config/user.json" >> .gitignore
+git add .gitignore && git commit -m "gitignore config/user.json" && git push
+```
+
+### 5. Repeat for other machines
+
+On each machine where the triage repo is checked out, run:
+
+```bash
+cd <triage-repo>
+git pull                    # picks up the .gitignore change
+rm -rf .agents              # remove the now-untracked directory
+git clone git@github.com:<username>/workflow.git .agents
+gh api user --jq '{login: .login, name: .name}' > config/user.json
+```
+
+The triage repo data (issues, reports, notes) is unchanged — only `.agents/` delivery changes.
