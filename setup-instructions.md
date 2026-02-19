@@ -10,7 +10,7 @@ If the current directory is not already a git repo, initialize one:
 git init
 ```
 
-Create a **private** GitHub repo for the triage workspace and set it as origin. Ask the user what they want to name it (suggest `issue-triage`).
+Create a **private** GitHub repo for the triage workspace and set it as origin. Ask the user what they want to name it (suggest `work`).
 
 ```bash
 gh repo create <name> --private
