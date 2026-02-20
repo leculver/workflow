@@ -2,7 +2,7 @@
 name: load-issue
 description: >
   Loads all prior context for a specific issue and presents a briefing to the developer. Use when the user
-  says "load", "continue", or "pick up" an issue. Reads the existing JSON report, captain's log, reproduction
+  says "load", "continue", or "pick up" an issue. Reads the existing JSON report, log, reproduction
   artifacts, fix branches, and latest GitHub comments. Does NOT autonomously investigate — instead primes the
   conversation so the developer can ask followups, try things, and direct the investigation interactively.
   Do NOT use when the user says "triage", "diagnose", "fix", "work on", or "investigate" an issue — that is diagnose-and-fix.
@@ -60,7 +60,7 @@ Before doing anything else, gather ALL context:
 **c) Existing JSON report:**
 - Read `issues/<owner>-<repo>/<issue_number>/report.json`.
 
-**d) Captain's log:**
+**d) Log:**
 - Read `issues/<owner>-<repo>/<issue_number>/log.md` in full.
 - This is the best source of "what happened when" — understand the full investigation arc.
 
@@ -126,7 +126,7 @@ Follow the developer's lead. When they ask you to do something, do it and report
 
 1. Create `issues/<owner>-<repo>/<issue_number>/.bookkeeping/` if it doesn't exist.
 2. At the start of the session, create a file named `<ISO-8601-timestamp>.log` (e.g., `2026-02-17T13-30-00Z.log`).
-3. Append to this file as you go — key findings, commands run, code read, conclusions reached. Write in the same style as a captain's log entry.
+3. Append to this file as you go — key findings, commands run, code read, conclusions reached. Write in the same style as a log entry.
 4. **If your progress file disappears** (renamed by `bookkeeping` flushing from another session), create a new one with a fresh timestamp and continue. The prior content was already captured.
 5. This file is gitignored and local-only. It exists as a safety net so that if the session ends without an explicit save, the next `bookkeeping` run will flush it into `log.md`.
 
@@ -139,7 +139,7 @@ When the developer indicates the session is over (or asks you to save progress):
 - Set `manually_investigated` to `true`.
 - Write atomically (`.tmp` then rename).
 
-**Captain's log — append a new session entry to `log.md`:**
+**Log — append a new session entry to `log.md`:**
 - Do NOT overwrite previous entries — append only.
 - Add a new `## <timestamp> — <platform> — manual investigation` section.
 - Record: what was attempted, what was discovered, what changed.

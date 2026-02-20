@@ -164,7 +164,7 @@ If you skipped reproduction or fixing, you MUST document the specific reason in 
    - Write atomically (`.tmp` then rename).
    - Set `manually_investigated` to `false` (automated triage).
 
-3. **Append to captain's log** at `issues/<owner>-<repo>/<issue_number>/log.md`:
+3. **Append to log** at `issues/<owner>-<repo>/<issue_number>/log.md`:
    - Append a timestamped session entry (do NOT overwrite previous entries).
    - Record: session date/time, platform, what was attempted, what was discovered, what changed.
    - Format:

@@ -1,7 +1,7 @@
 ---
 name: bookkeeping
 description: >
-  Flushes in-progress investigation notes (.bookkeeping/) into captain's logs and reports, checks
+  Flushes in-progress investigation notes (.bookkeeping/) into logs and reports, checks
   deletion reminders, and pulls the triage repo. Called by other skills at startup, or standalone
   via "clean up", "flush progress", or "bookkeeping". Handles concurrent sessions gracefully via
   rename-before-flush.
@@ -63,7 +63,7 @@ If the script returned any `logs` entries:
 
 For each issue in the `logs` array:
 
-**a) Append to captain's log:**
+**a) Append to log:**
 
 1. Read the existing `log.md` for this issue.
 2. Append a new session entry:

@@ -6,7 +6,7 @@ Usage:
 
 Scans for:
   1. Per-issue .bookkeeping/*.log files — renames to .flushing.log, reads content,
-     outputs structured JSON so the LLM can append to captain's logs. Silent operation.
+     outputs structured JSON so the LLM can append to logs. Silent operation.
   2. Root .bookkeeping/*.delete files — checks for expired items and prints warnings.
 
 Output format (JSON to stdout):
