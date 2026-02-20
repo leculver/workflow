@@ -145,7 +145,8 @@ When the developer indicates the session is over (or asks you to save progress):
 - Record: what was attempted, what was discovered, what changed.
 
 **Markdown update:**
-- Overwrite `report.md` with the latest findings.
+- Overwrite `report.md` with the latest findings, following the **learning-focused format** defined in `diagnose-and-fix` Step 9.
+- The report should teach the reader about the code, not just document the bug. Include a "How the Code Works" section explaining the relevant subsystem, key types, call chains, and design decisions — with file paths and line numbers.
 - Clearly mark what is NEW from this session vs. carried over from prior work.
 
 ### Step 5: Commit

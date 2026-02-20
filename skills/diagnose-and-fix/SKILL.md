@@ -179,11 +179,38 @@ If you skipped reproduction or fixing, you MUST document the specific reason in 
    - If this is the first session, create the file with a `# Log: <repo>#<issue_number>` header.
 
 4. **Write Markdown report** to `issues/<owner>-<repo>/<issue_number>/report.md`:
-   - Explain the issue, triage status, category, staleness.
-   - Full accounting of investigation and reproduction attempts.
-   - Describe any fix candidate.
-   - Include a link to the captain's log: `[Log](log.md)`
-   - Write atomically.
+
+   The report.md is **not just a triage record** — it is a **learning document**. The reader is a developer who wants to understand the codebase through the lens of this issue. Every report should leave the reader knowing more about how the code works than they did before. Keep all triage/status/fix information, but shift the center of gravity toward explaining the code.
+
+   **Required sections (in order):**
+
+   - **Header block:** Issue title, GitHub link, state, labels, dates (same as today).
+   - **Triage table:** Category, status, affected repo, platforms, fix branch, confidence (same as today).
+   - **Summary:** 2-3 paragraph overview of the issue AND what you learned about the code. Not just "what's broken" — explain what the code is *trying to do* and why it matters.
+   - **How the Code Works:** This is the new heart of the report. Explain the relevant subsystem, module, or component the issue touches. Walk through the architecture:
+     - What are the key types, classes, or functions involved?
+     - What is the call chain or data flow for the affected scenario?
+     - How do the pieces fit together? What are the important interfaces or abstractions?
+     - What design decisions or tradeoffs does the code make?
+     - If the code spans multiple repos, explain how they interact.
+     - Use code snippets, call chains, and diagrams (ASCII is fine) to illustrate.
+     - Cite specific file paths and line numbers so the reader can follow along.
+     - This section should be useful even to someone who doesn't care about the bug — it should teach the reader about this part of the codebase.
+   - **Root Cause / Issue Analysis:** What specifically is broken or missing, and why. Reference the architecture you just explained. This should flow naturally from the "How the Code Works" section — "now that you understand how X works, here's what goes wrong when Y happens."
+   - **Fix Details:** What was changed and why. Explain the fix in terms of the architecture, not just as a diff. Include diffs for precision, but narrate the reasoning.
+   - **Investigation Trail:** Observations and reproduction steps (same as today).
+   - **Artifacts:** Dump files, repro code, etc. (same as today).
+   - **Key Comments:** Notable GitHub comments (same as today).
+   - **Log link:** `[Log](log.md)`
+
+   **Tone and depth guidelines:**
+   - Write as if explaining to a teammate who is smart but unfamiliar with this part of the code.
+   - Err on the side of too much context rather than too little.
+   - Don't just name types — explain what they do and how they relate to each other.
+   - When you read surrounding code to understand the issue, share what you learned, not just what's broken.
+   - If you discover interesting design patterns, constraints, or historical context, include it.
+
+   Write atomically (`.tmp` then rename).
 
 ### Step 10: Commit Results
 
