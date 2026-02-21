@@ -192,18 +192,20 @@ Output: notes/documents/<topic-name>.md
 - [ ] Task 2: <section/topic description>
 ...
 - [ ] Final review: Verify accuracy of entire document, check all code blocks and links, add new tasks if gaps found
+- [ ] Reorganize for learning: Reorder sections into a logical learning progression (see Notes)
 
 ## Research Summary
 <condensed version of key findings to give the loop agent context>
 
 ## Notes
 - The task list is a starting point. Add new tasks as you discover topics that need coverage.
-- The final review task should always be last. If it reveals issues, add new tasks and a new final review.
+- The final review task should be second-to-last. If it reveals issues, add new tasks and a new final review before the reorganization step.
 - Every section should have real code blocks with GitHub links.
+- The "Reorganize for learning" task is ALWAYS the very last task. It reorders sections into a logical learning progression without modifying content. Think about what a reader needs to understand first before they can understand later sections. Foundational concepts come first, implementation details build on them, advanced topics and edge cases come last. Move sections around, don't rewrite them.
 ```
 
-The final review task is ALWAYS added as the last item. If the review reveals issues,
-the agent should add new fix-up tasks plus a new final review at the end.
+The final review task is ALWAYS second-to-last. The reorganization task is ALWAYS last.
+If the review reveals issues, add fix-up tasks plus a new final review before the reorganization step.
 
 ### Step 7: Generate AGENTS.md
 
@@ -288,14 +290,27 @@ git push
 
 ## Final Review
 
-The last task in the plan is always a full-document verification pass:
+The second-to-last task in the plan is a full-document verification pass:
 1. Read the entire document end-to-end
 2. Verify every code block still matches the source at the pinned commit
 3. Check that all GitHub links are correctly formatted with the right line numbers
 4. Look for gaps — topics mentioned but not explained, shallow sections, missing code
 5. Verify cross-references between sections are consistent
-6. If issues are found, add new tasks to PLAN.md and a NEW "Final review" task at the end
-7. Only mark STATUS: COMPLETE when the document passes review with no issues
+6. If issues are found, add new tasks to PLAN.md and a NEW "Final review" task before the reorganization step
+
+## Reorganize for Learning
+
+The very last task is always reorganization. This is a structural pass, not a content pass:
+1. Read the entire document and identify the dependency graph between concepts
+2. Reorder sections so that foundational concepts come first and each section builds on
+   what came before — the reader should never encounter a concept that depends on something
+   explained later
+3. **Move sections, do not rewrite them.** The content was already verified in the review step.
+   Only make minimal edits to fix transitions between reordered sections (e.g., "as we saw
+   above" → "as we'll see in the next section").
+4. Consider this progression: motivation/overview → core data structures → key algorithms →
+   platform-specific details → edge cases → related tooling → future work/open issues
+5. Only mark STATUS: COMPLETE after reorganization is done
 
 ## Operational Notes
 - The document can be large. That's expected — depth is the goal.
