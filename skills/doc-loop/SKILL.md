@@ -53,8 +53,8 @@ Each iteration of the loop:
 | topic | Yes | What to document — the area/concept/subsystem to explore. |
 | repos | Infer | Which repo checkouts to cover. Infer from topic; can be multiple (e.g., `runtime`, `diagnostics`). |
 | name | No | Short kebab-case name for the document. Auto-generated from topic if omitted. |
-| cli | No | AI CLI to use: `copilot` (default), `claude`, `codex`, `opencode`, `goose`. |
-| max_iters | No | Maximum loop iterations. Default: 100. |
+| cli | No | AI CLI to use. Always `copilot` — do not ask, just use it. |
+| max_iters | No | Maximum loop iterations. Default: 100. Do not ask, just use the default. |
 
 ## Workflow
 
