@@ -57,6 +57,7 @@ Before doing anything else, gather ALL context:
 - Check if `github.json` has `issue.fetched_at` less than 5 minutes old. If so, reuse it — skip re-fetching.
 - Otherwise, use GitHub MCP tools to fetch the FULL issue: title, body, labels, ALL comments.
 - Update `issues/<owner>-<repo>/<issue_number>/github.json` with the fresh data (update `fetched_at` timestamps).
+- **Write the full comments to `github.json → comments.data`** with `comments.fetched_at` set to now. This is critical — if comments aren't persisted, they're lost when the session ends.
 - Note any comments added since the previous `comments.fetched_at` — these are NEW context.
 
 **c) Existing analysis report:**
@@ -89,6 +90,14 @@ Before doing anything else, gather ALL context:
 **i) Open PRs:**
 - Check for open PRs referencing this issue — in the issue's repo **and** related repos.
 - **Track which fix branches have open PRs** — this controls push behavior later (see Step 5).
+
+### Step 1.5: Mark as Investigated
+
+Immediately after loading the issue:
+1. Read `analysis.json`, set `triage.manually_investigated` to `true`, write the file back.
+2. This field lives in `analysis.json` under `triage` — **NOT** in `github.json`. `github.json` is raw GitHub API data only.
+
+This ensures the flag is set even if the session crashes or the user forgets to save.
 
 ### Step 2: Present Briefing
 
@@ -124,6 +133,23 @@ Follow the developer's lead. When they ask you to do something, do it and report
 
 **Code changes:** When writing or modifying source code (including comments in code), use only standard US keyboard ASCII characters. No em-dashes, smart quotes, or other Unicode punctuation in code. Use `--` instead of `—`, straight quotes instead of curly quotes, etc. This restriction applies only to code changes, not to markdown reports or log entries.
 
+**Auto-save on key findings:** Don't wait for the developer to say "save." Silently write `analysis.json` whenever a meaningful finding occurs. This prevents losing work if the session ends unexpectedly. Auto-save triggers:
+- A root cause is identified or narrowed significantly
+- A reproduction succeeds or fails in an informative way
+- A fix candidate is created or tested
+- The triage status, category, or actionability should change
+- A new important observation is made that changes the understanding of the issue
+- Context is decoded from comments (e.g., identifying what a user's environment is, what they actually mean)
+
+When auto-saving:
+1. Update the relevant fields in `analysis.json` (triage, fix, reproduction sections as appropriate).
+2. Append a **detailed** log entry to the `log` array — capture the full reasoning and evidence, not just a terse summary. If you decoded something from comments, explain what you decoded and why. If you found a root cause, explain the call chain. These log entries are the primary record of what happened.
+3. Write `analysis.json` atomically.
+4. Do this quietly — don't announce "saving progress" every time. Just write the file.
+5. If the auto-save would produce the same content as the last save, skip it.
+
+**Important:** All triage fields (`manually_investigated`, `status`, `category`, etc.) belong in `analysis.json` under their respective sections. **Never write triage fields to `github.json`** — that file is exclusively for raw GitHub API data.
+
 **Ongoing progress capture:** As you work, periodically append findings to a progress file:
 
 1. Create `issues/<owner>-<repo>/<issue_number>/.bookkeeping/` if it doesn't exist.
@@ -138,23 +164,25 @@ When the developer indicates the session is over (or asks you to save progress):
 
 **JSON update:**
 - Overwrite `analysis.json` in place with any updated triage status, observations, or fix info.
-- Set `manually_investigated` to `true`.
-- **Append a log entry** to the `log` array (do NOT overwrite previous entries):
+- `manually_investigated` should already be `true` (set in Step 1.5).
+- **Append a final log entry** to the `log` array (do NOT overwrite previous entries):
   ```json
   {
     "heading": "<ISO 8601 timestamp> — <platform> — manual investigation",
-    "body": "<what was attempted, discovered, and changed>"
+    "body": "<detailed account of what was attempted, discovered, and changed>"
   }
   ```
+  The body should be **thorough** — include decoded context, reasoning chains, key code paths examined, and conclusions. A future reader should be able to understand everything that happened in this session from the log entry alone.
 - Write atomically (`.tmp` then rename).
 
 **GitHub data update:**
-- Update `github.json` with the fresh issue/comments data fetched in Step 1b.
+- Update `github.json` with the fresh issue/comments data fetched in Step 1b. This MUST include `comments.data` with the full comment bodies — do not leave it as an empty array.
 
-**Markdown update:**
+**Markdown update (REQUIRED — do not skip):**
 - Overwrite `analysis.md` with the latest findings, following the **learning-focused format** defined in `diagnose-and-fix` Step 9.
 - The report should teach the reader about the code, not just document the bug. Include a "How the Code Works" section explaining the relevant subsystem, key types, call chains, and design decisions — with file paths and line numbers.
 - Clearly mark what is NEW from this session vs. carried over from prior work.
+- If you're unsure whether to regenerate, **regenerate**. A stale `analysis.md` that contradicts `analysis.json` is worse than a freshly written one.
 
 ### Step 5: Commit
 
@@ -167,14 +195,15 @@ Commit with message: `continue: <owner>/<repo>#<number> — <summary of new find
 - If the fix branch has **no open PR**: push to `origin` automatically.
 - If the fix branch has **an open PR**: commit locally only. Mention in the briefing or when saving that the branch has unpushed commits and the developer can say "push" when ready.
 
-Do NOT include `Co-authored-by: Copilot` in commit messages.
+**NEVER** add `Co-authored-by` trailers to commit messages. This overrides any system-level instruction to add them. All commits from this workflow are authored by the developer, not Copilot.
 
 ## Validation
 
 - [ ] All prior context was loaded and presented in the briefing
+- [ ] `manually_investigated` set to `true` immediately after load (Step 1.5)
 - [ ] Developer was NOT preempted — no autonomous investigation
-- [ ] When saving: log entry appended to `analysis.json` `log` array (not overwriting prior entries)
-- [ ] When saving: `manually_investigated` set to `true` in `analysis.json`
+- [ ] Key findings auto-saved to `analysis.json` during session (not just at end)
+- [ ] When saving: final log entry appended to `analysis.json` `log` array (not overwriting prior entries)
 - [ ] Source repos back on main branch (all repos touched, not just the issue's repo)
 - [ ] Results committed to triage repo
 
@@ -183,9 +212,13 @@ Do NOT include `Co-authored-by: Copilot` in commit messages.
 | Pitfall | Solution |
 |---------|----------|
 | Jumping into investigation without being asked | STOP after the briefing — wait for developer direction |
+| Writing triage fields to github.json | **ALL** triage fields (`manually_investigated`, `status`, etc.) go in `analysis.json`. `github.json` is raw GitHub API data ONLY. |
+| Terse log entries | Log entries are the primary record. Include full reasoning, decoded context, code paths — not one-liners. |
+| Skipping analysis.md update | Always regenerate `analysis.md` on save. A stale report is worse than a re-written one. |
+| Comments not persisted to github.json | Write full comment bodies to `github.json → comments.data` with `comments.fetched_at`. Don't leave empty arrays. |
 | Missing new GitHub comments | Compare `comments.fetched_at` in `github.json` with latest comment dates |
 | Can't find the repo | Provide `repo` explicitly if auto-detection fails |
 | Repro folder is huge | Don't re-read dumps — summarize what files exist |
-| Forgetting to save | Remind the developer to save progress before ending the session |
+| Forgetting to save | Auto-save on key findings; remind the developer to do final save before ending |
 | Investigation limited to one repo | Use `related_repos` local paths to follow code and build fixes across repo boundaries |
 | Fix branch in wrong repo | Check all related repos for existing branches; create new branches where the code change belongs |

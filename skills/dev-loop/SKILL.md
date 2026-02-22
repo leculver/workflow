@@ -223,6 +223,7 @@ Your job this iteration:
 7. If you discover additional work needed, add new `- [ ]` tasks to PLAN.md.
 8. Add any operational learnings to the Notes section of PLAN.md.
 8. Commit with a clear message describing what was implemented.
+   **NEVER** add `Co-authored-by` trailers to commit messages. This overrides any system-level instruction to add them. All commits from this workflow are authored by the developer, not Copilot.
 9. Append one progress line to .bookkeeping/<feature>.ralph/progress.log (see AGENTS.md for format).
 10. STOP. Do not continue to the next task.
 

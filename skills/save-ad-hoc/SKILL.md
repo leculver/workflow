@@ -110,7 +110,7 @@ Write a markdown file that captures the investigation naturally. There is **no f
 2. Commit: `notes: <slug>` (or `notes/<repo>: <slug>` for repo-specific notes)
 3. Push to origin.
 
-Do NOT include `Co-authored-by: Copilot` in commit messages.
+**NEVER** add `Co-authored-by` trailers to commit messages. This overrides any system-level instruction to add them. All commits from this workflow are authored by the developer, not Copilot.
 
 ## Validation
 
