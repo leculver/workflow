@@ -63,9 +63,10 @@ Invoke `bookkeeping` to pull the triage repo and flush any pending `.bookkeeping
 
 ### Step 3: Fetch Issue Details
 
-1. Use GitHub MCP tools to fetch the full issue: title, body, labels, assignees, all comments.
-2. Check for open PRs that reference this issue.
-3. Write `issues/<owner>-<repo>/<issue_number>/github.json` with the raw API responses:
+1. Check if `issues/<owner>-<repo>/<issue_number>/github.json` already exists and has `issue.fetched_at` less than 5 minutes old. If so, reuse it — skip re-fetching.
+2. Otherwise, use GitHub MCP tools to fetch the full issue: title, body, labels, assignees, all comments.
+3. Check for open PRs that reference this issue.
+4. Write `issues/<owner>-<repo>/<issue_number>/github.json` with the raw API responses:
    ```json
    {
      "issue": {

@@ -54,7 +54,8 @@ Before doing anything else, gather ALL context:
 - If found in exactly one, use that repo. If ambiguous, ask the user.
 
 **b) GitHub Issue (live):**
-- Use GitHub MCP tools to fetch the FULL issue: title, body, labels, ALL comments.
+- Check if `github.json` has `issue.fetched_at` less than 5 minutes old. If so, reuse it — skip re-fetching.
+- Otherwise, use GitHub MCP tools to fetch the FULL issue: title, body, labels, ALL comments.
 - Update `issues/<owner>-<repo>/<issue_number>/github.json` with the fresh data (update `fetched_at` timestamps).
 - Note any comments added since the previous `comments.fetched_at` — these are NEW context.
 

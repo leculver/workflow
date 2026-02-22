@@ -102,12 +102,32 @@ Based on the user's response:
 
 **Important:** Do NOT delete files without asking. This is a reminder system, not enforcement.
 
-### Step 5: Commit
+### Step 5: Refresh GitHub Data
 
-If any analysis.json files were updated:
+Bulk-refresh `github.json` files for issues that may have changed on GitHub.
+
+1. Read `config/refresh-state.json` (gitignored, machine-local). This is a JSON object mapping `owner/repo` → ISO 8601 timestamp of the last bulk scan. If the file doesn't exist, create it with empty `{}`.
+
+2. For each configured repo in `config/repos.json`:
+   a. Read the repo's last scan timestamp from `refresh-state.json`. If missing, treat as "never scanned" — use a timestamp far enough back to cover all tracked issues (e.g., 2 years ago).
+   b. **Skip if the last scan was less than 6 hours ago.**
+   c. Query GitHub: `GET /repos/{owner}/{repo}/issues?since={last_scan}&state=all&per_page=100` (paginate).
+   d. For each issue returned that has an existing `issues/<owner>-<repo>/<number>/github.json`:
+      - Update the `issue.data` field with the fresh API response.
+      - Update `issue.fetched_at` to now.
+      - Do NOT re-fetch comments in the bulk sweep (too expensive). Leave `comments` unchanged.
+   e. Update `refresh-state.json` with the current timestamp for this repo.
+
+3. If any `github.json` files were updated, stage and include them in the Step 6 commit.
+
+**Rate budget:** This costs ~1–5 API calls per repo (paginated), regardless of how many issues are tracked. Safe to run frequently.
+
+### Step 6: Commit
+
+If any analysis.json or github.json files were updated:
 
 1. `git add` the changed files.
-2. Commit: `bookkeeping: flush progress for <owner>/<repo>#<number>` (one commit per issue, or batch if multiple).
+2. Commit: `bookkeeping: flush progress for <owner>/<repo>#<number>` (one commit per issue, or batch if multiple). If only github.json files were refreshed (no log flushes), use: `bookkeeping: refresh github data for <owner>/<repo>`.
 
 Do NOT include `Co-authored-by: Copilot` in commit messages.
 
