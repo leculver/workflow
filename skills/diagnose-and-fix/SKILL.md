@@ -91,7 +91,7 @@ Invoke `bookkeeping` to pull the triage repo and flush any pending `.bookkeeping
    - Proceed to reproduction (Step 6) even though the issue was previously triaged — the point is to retry on the correct platform.
    - If reproduction succeeds, update status from `platform-blocked` to `reproduced` (or the appropriate new status).
    - If still blocked (e.g., needs macOS and we're on Linux), keep `platform-blocked` but update `requires_platform` to reflect only the remaining platforms.
-4. Check if `repros/issue_<issue_number>/` exists in the workspace.
+4. Check if `issues/<owner>-<repo>/<issue_number>/repro/` exists.
 5. Summarize what's known before proceeding.
 
 ### Step 5: Classify (quick — do not stop here)
@@ -124,7 +124,7 @@ For bugs, check if the bug has already been fixed since the issue was filed — 
 
 Follow the [reproduction rules](references/reproduction-rules.md):
 
-1. Create `<workspace>/repros/issue_<NUMBER>/` if it doesn't exist.
+1. Create `issues/<owner>-<repo>/<issue_number>/repro/` if it doesn't exist.
 2. Ensure the source repo (and any related repos needed) are on their main branches.
 3. Write a minimal repro (console app, unit test, or script). The repro may reference or build against code from any of the local repo checkouts.
 4. Set dump capture environment variables from config.

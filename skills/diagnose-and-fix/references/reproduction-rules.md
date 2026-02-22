@@ -12,7 +12,7 @@
 ## Repro Directory Structure
 
 ```
-<workspace>/repros/issue_<NUMBER>/
+issues/<owner>-<repo>/<issue_number>/repro/
 ├── <repro app files>
 ├── dumps/
 │   └── *.dmp, *.crashreport.json
@@ -33,7 +33,7 @@ DOTNET_CreateDumpVerboseDiagnostics=1
 DOTNET_EnableCrashReport=1
 ```
 
-These should be set relative to the repro's working directory (e.g., `./repros/issue_####/dumps`).
+These should be set relative to the repro's working directory (e.g., `issues/<owner>-<repo>/<number>/repro/dumps`).
 
 ## Dump File Naming
 
@@ -44,8 +44,8 @@ These should be set relative to the repro's working directory (e.g., `./repros/i
 ## Crash Artifact Handling
 
 - If you trigger a crash, ensure dump/crash-report artifacts are captured.
-- Store dumps in `./repros/issue_<NUMBER>/dumps/`.
-- Copy or move relevant artifacts into `./repros/issue_<NUMBER>/artifacts/` and reference their paths in the JSON.
+- Store dumps in `issues/<owner>-<repo>/<number>/repro/dumps/`.
+- Copy or move relevant artifacts into `issues/<owner>-<repo>/<number>/repro/artifacts/` and reference their paths in the JSON.
 - You can write ClrMD apps/scripts to load the dumps you generate to reproduce issues.
 
 **IMPORTANT: Dumps are NOT committed to the triage repo** (they are gitignored — too large). Instead, persist enough information to **regenerate** them:
@@ -63,7 +63,7 @@ These should be set relative to the repro's working directory (e.g., `./repros/i
    - Run the app to trigger the crash
    - Rename the resulting dump to `.dmp` if needed
 4. **Commit the repro script and source** — these are small and reproducible. The dump itself stays local.
-5. Reference dump paths in the JSON as relative paths under `repros/` — a developer on another machine can regenerate them by running the repro script.
+5. Reference dump paths in the JSON as relative paths under `issues/<owner>-<repo>/<number>/repro/` — a developer on another machine can regenerate them by running the repro script.
 
 ## Fix Attempt Rules
 

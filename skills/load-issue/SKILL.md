@@ -71,9 +71,8 @@ Before doing anything else, gather ALL context:
 - Read `issues/<owner>-<repo>/<issue_number>/analysis.md`.
 
 **f) Reproduction folder:**
-- Check if `<workspace>/repros/issue_<issue_number>/` exists.
+- Check if `issues/<owner>-<repo>/<issue_number>/repro/` exists.
 - If so, inventory its contents: repro apps, dumps, artifacts, logs, scripts.
-- Check committed repro source in `issues/<owner>-<repo>/<issue_number>/repro/` too.
 
 **g) Fix branches:**
 - Check if a branch named `issue_<issue_number>` exists in the source repo **and all related repos** (from `related_repos` in config). The fix may have been created in a different repo than where the issue was filed.

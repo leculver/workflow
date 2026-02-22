@@ -19,7 +19,7 @@ Move dump files into long-term managed storage with lifecycle tracking.
 
 ## When Not to Use
 
-- Generating dumps during reproduction (those stay in `repros/issue_<NUMBER>/dumps/`)
+- Generating dumps during reproduction (those stay in `issues/<owner>-<repo>/<number>/repro/dumps/`)
 - Analyzing an existing dump (use a debugger or ClrMD)
 - Configuring dump collection (use `collect-dumps`)
 
@@ -145,5 +145,5 @@ Report to the user:
 | Auto-deleting dumps | NEVER auto-delete — the system only reminds |
 | Leaving originals behind | Always move — copy, verify size, then delete original |
 | Deleting before verifying | Always verify destination file size matches source before deleting original |
-| Confusing with repro dumps | Repro dumps stay in `repros/issue_<NUMBER>/dumps/` — this skill is for long-term storage only |
+| Confusing with repro dumps | Repro dumps stay in `issues/<owner>-<repo>/<number>/repro/dumps/` — this skill is for long-term storage only |
 | Single file in subdirectory | Single dumps are flat files, not in a subdirectory |
