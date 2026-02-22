@@ -40,7 +40,7 @@ Invoke `bookkeeping` to pull the triage repo and flush any pending `.bookkeeping
 ### Step 1: Gather Fix Candidates
 
 1. Read `config/repos.json` for repo paths.
-2. Scan all `issues/<owner>-<repo>/*/report.json` files.
+2. Scan all `issues/<owner>-<repo>/*/analysis.json` files.
 3. Collect issues where `fix.has_candidate == true`.
 4. If `issue_number` is provided, filter to just that one.
 
@@ -117,10 +117,10 @@ Summary:
 ### Step 6: Update Reports (optional)
 
 For superseded fixes:
-- Update the issue's `report.json`: set `fix.has_candidate = false`, add note about superseding PR.
+- Update the issue's `analysis.json`: set `fix.has_candidate = false`, add note about superseding PR.
 
 For branch-missing fixes:
-- Update `report.json` to clear the branch reference.
+- Update `analysis.json` to clear the branch reference.
 
 Commit any report updates: `validate-fixes: <owner>/<repo> — updated N reports`
 

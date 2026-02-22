@@ -327,11 +327,24 @@ Write-Host "╔═════════════════════�
 Write-Host "║  Dev Loop: $Feature" -ForegroundColor Cyan
 Write-Host "║  Repo: $RepoName | CLI: $Cli | Max: $MaxIters iters" -ForegroundColor Cyan
 Write-Host "║  Mode: $Mode" -ForegroundColor Cyan
+Write-Host "║  Pause: create pause.txt in .ralph/ dir to pause" -ForegroundColor Cyan
 Write-Host "╚══════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
 Write-Host ""
 
 try {
     for ($i = 1; $i -le $MaxIters; $i++) {
+        # Check for pause file
+        $PauseFile = Join-Path $RalphDir "pause.txt"
+        if (Test-Path $PauseFile) {
+            Write-Host "  ⏸️  Paused — remove $PauseFile to resume..." -ForegroundColor Magenta
+            Add-Content -Path $LogFile -Value "⏸️ Paused at $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+            while (Test-Path $PauseFile) {
+                Start-Sleep -Seconds 5
+            }
+            Write-Host "  ▶️  Resumed." -ForegroundColor Green
+            Add-Content -Path $LogFile -Value "▶️ Resumed at $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+        }
+
         $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
         $header = "`n=== Dev Loop iteration $i/$MaxIters ($Mode) — $timestamp ==="
         Write-Host $header -ForegroundColor Yellow
@@ -507,10 +520,23 @@ echo "╔═══════════════════════�
 echo "║  Dev Loop: $FEATURE"
 echo "║  Repo: $REPO_NAME | CLI: $CLI | Max: $MAX_ITERS iters"
 echo "║  Mode: $MODE"
+echo "║  Pause: create pause.txt in .ralph/ dir to pause"
 echo "╚══════════════════════════════════════════════════════════╝"
 echo ""
 
 for i in $(seq 1 "$MAX_ITERS"); do
+    # Check for pause file
+    PAUSE_FILE="$RALPH_DIR/pause.txt"
+    if [ -f "$PAUSE_FILE" ]; then
+        echo -e "  \033[35m⏸️  Paused — remove $PAUSE_FILE to resume...\033[0m"
+        echo "⏸️ Paused at $(date '+%Y-%m-%d %H:%M:%S')" >> "$LOG_FILE"
+        while [ -f "$PAUSE_FILE" ]; do
+            sleep 5
+        done
+        echo -e "  \033[32m▶️  Resumed.\033[0m"
+        echo "▶️ Resumed at $(date '+%Y-%m-%d %H:%M:%S')" >> "$LOG_FILE"
+    fi
+
     TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
     echo -e "\n\033[33m=== Dev Loop iteration $i/$MAX_ITERS ($MODE) — $TIMESTAMP ===\033[0m"
     echo "=== Dev Loop iteration $i/$MAX_ITERS ($MODE) — $TIMESTAMP ===" >> "$LOG_FILE"
@@ -631,6 +657,11 @@ To see full output:
   Get-Content .\.bookkeeping\workflow-viewer.ralph\ralph.log -Tail 50
 
 To stop: Ctrl+C
+
+To pause between iterations (make manual changes, then resume):
+  echo "paused" > .\.bookkeeping\workflow-viewer.ralph\pause.txt
+  # ... make your changes ...
+  Remove-Item .\.bookkeeping\workflow-viewer.ralph\pause.txt
 ```
 
 ## Saving Progress as a Note

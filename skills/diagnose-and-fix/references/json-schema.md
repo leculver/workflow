@@ -1,24 +1,30 @@
-# JSON Report Schema
+# Issue File Schema
 
-The canonical schema is at `config/schemas/issue-report.schema.json` in the triage repo root.
+Issues are stored across two JSON files per issue directory, plus a markdown summary.
 
-## Quick Reference
+## `github.json` — Raw GitHub API Data
 
 ```json
 {
   "issue": {
-    "number": <int>,
-    "url": "<github issue url>",
-    "title": "<issue title>",
-    "state": "open|closed",
-    "labels": ["<label>", ...],
-    "created_at_utc": "<ISO 8601>",
-    "fetched_at_utc": "<ISO 8601>",
-    "body_excerpt": "<max 500 chars>",
-    "key_comments_excerpt": ["<comment>", ...],
-    "manually_investigated": <bool>,
-    "assignees": ["<github username>", ...]
+    "fetched_at": "<ISO 8601>",
+    "data": { /* raw response from issue_read(method="get") */ }
   },
+  "comments": {
+    "fetched_at": "<ISO 8601>",
+    "data": [ /* raw response from issue_read(method="get_comments") */ ]
+  }
+}
+```
+
+- `fetched_at` is per-section so issue and comments can be refreshed independently.
+- `data` is the raw API response — do not transform or cherry-pick fields.
+- Staleness check: compare `issue.fetched_at` vs `issue.data.updated_at`.
+
+## `analysis.json` — Our Analysis
+
+```json
+{
   "triage": {
     "category": "bug|feature-request|question|docs",
     "status": "<see triage-categories.md>",
@@ -28,8 +34,9 @@ The canonical schema is at `config/schemas/issue-report.schema.json` in the tria
     "affected_repo": "<repo short name or 'unknown'>",
     "requires_platform": ["any"],
     "staleness": "active|stale|superseded",
-    "superseded_by": <int or null>,
-    "actionability": "high|medium|low"
+    "superseded_by": null,
+    "actionability": "high|medium|low",
+    "manually_investigated": false
   },
   "environment": {
     "os": "<OS description>",
@@ -52,24 +59,34 @@ The canonical schema is at `config/schemas/issue-report.schema.json` in the tria
         "description": "<what was done>",
         "cmd": "<command run>",
         "cwd": "<working directory>",
-        "exit_code": <int>,
+        "exit_code": 0,
         "stdout_tail": "<last output lines>",
         "summary": "<one-line result>"
       }
     ],
-    "artifacts": ["<relative path>", ...],
-    "observations": ["<finding>", ...]
+    "artifacts": ["<relative path>"],
+    "observations": ["<finding>"]
   },
   "fix": {
-    "has_candidate": <bool>,
+    "has_candidate": false,
     "summary": "<fix description>",
-    "confidence": <0.0-1.0>,
+    "confidence": 0.0,
     "branch": "<branch name>",
-    "fix_repo": "<owner/repo where the branch was created, if different from the issue's repo>",
+    "fix_repo": "<owner/repo where the branch was created, if different>",
     "diff": "<unified diff or description>"
-  }
+  },
+  "log": [
+    {
+      "heading": "<ISO 8601 timestamp> — <platform> — <session type>",
+      "body": "<session notes, findings, status changes>"
+    }
+  ]
 }
 ```
+
+## `analysis.md` — Human-Readable Summary
+
+Markdown report following the learning-focused format defined in `diagnose-and-fix` Step 9.
 
 ## Writing Rules
 
@@ -78,3 +95,5 @@ The canonical schema is at `config/schemas/issue-report.schema.json` in the tria
 - `affected_repo` should match a key in `config/repos.json` `related_repos` or the main repo name.
 - `reproduction.artifacts` should list paths to repro source and scripts (committed), NOT dump files (gitignored).
 - Always include a `repro/` directory with source code and a `repro.sh`/`repro.bat` to regenerate dumps.
+- Log entries are appended to the `log` array in `analysis.json` — never overwrite prior entries.
+- `github.json` stores raw API responses — do not transform or cherry-pick fields into it.

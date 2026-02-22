@@ -50,22 +50,23 @@ Before doing anything else, gather ALL context:
 - **Load local tools** — read `config/local-tools.json` via `local-tools` (action: `list`). This puts tool paths in context for the interactive session so you can launch debuggers, analyzers, etc. without searching.
 
 **b) Infer repo if not provided:**
-- Search `issues/*/issue_number/report.json` across all repo directories in the triage repo.
+- Search `issues/*/issue_number/analysis.json` across all repo directories in the triage repo.
 - If found in exactly one, use that repo. If ambiguous, ask the user.
 
 **b) GitHub Issue (live):**
 - Use GitHub MCP tools to fetch the FULL issue: title, body, labels, ALL comments.
-- Note any comments added since `fetched_at_utc` in the last report — these are NEW context.
+- Update `issues/<owner>-<repo>/<issue_number>/github.json` with the fresh data (update `fetched_at` timestamps).
+- Note any comments added since the previous `comments.fetched_at` — these are NEW context.
 
-**c) Existing JSON report:**
-- Read `issues/<owner>-<repo>/<issue_number>/report.json`.
+**c) Existing analysis report:**
+- Read `issues/<owner>-<repo>/<issue_number>/analysis.json`.
 
-**d) Log:**
-- Read `issues/<owner>-<repo>/<issue_number>/log.md` in full.
+**d) Investigation log:**
+- Read the `log` array from `analysis.json` in full.
 - This is the best source of "what happened when" — understand the full investigation arc.
 
 **e) Existing Markdown report:**
-- Read `issues/<owner>-<repo>/<issue_number>/report.md`.
+- Read `issues/<owner>-<repo>/<issue_number>/analysis.md`.
 
 **f) Reproduction folder:**
 - Check if `<workspace>/repros/issue_<issue_number>/` exists.
@@ -79,7 +80,7 @@ Before doing anything else, gather ALL context:
 
 **h) Check out fix branches:**
 - If a fix branch was found in Step 1g, **check it out** in the appropriate repo so the developer starts on the fix code.
-- Use `fix_repo` from `report.json` (if set) to determine which repo checkout to switch. If `fix_repo` is empty, use the issue's own repo checkout.
+- Use `fix_repo` from `analysis.json` (if set) to determine which repo checkout to switch. If `fix_repo` is empty, use the issue's own repo checkout.
 - If fix branches exist in **multiple** related repos, check them all out.
 - This lets the developer immediately see, build, and test the fix without manual branch switching.
 - Record which repos were switched so they can be restored to main in Step 5.
@@ -95,7 +96,7 @@ Present a clear, structured briefing to the developer. This is the **primary out
 1. **Issue summary** — Title, category, link, key details from the body
 2. **Current triage status** — Status, staleness, affected repo, platforms, actionability
 3. **Cross-repo context** — List the related repos and their local paths. If `affected_repo` differs from the issue's repo, highlight this — the root cause is elsewhere. Remind the developer (and yourself) that investigation and fixes should follow the code wherever it leads across these repos.
-4. **Investigation history** — What was attempted across all sessions (from log.md)
+4. **Investigation history** — What was attempted across all sessions (from `analysis.json` `log` array)
 5. **Reproduction status** — Was it reproduced? What repro artifacts exist? Where?
 6. **Fix status** — Is there a candidate fix? Which repo is the branch in? Branch name, confidence, what it changes. Note that the fix branch has been checked out and is ready to build/test.
 7. **Open PRs** — Any PRs already addressing this issue (across all related repos)
@@ -128,30 +129,35 @@ Follow the developer's lead. When they ask you to do something, do it and report
 2. At the start of the session, create a file named `<ISO-8601-timestamp>.log` (e.g., `2026-02-17T13-30-00Z.log`).
 3. Append to this file as you go — key findings, commands run, code read, conclusions reached. Write in the same style as a log entry.
 4. **If your progress file disappears** (renamed by `bookkeeping` flushing from another session), create a new one with a fresh timestamp and continue. The prior content was already captured.
-5. This file is gitignored and local-only. It exists as a safety net so that if the session ends without an explicit save, the next `bookkeeping` run will flush it into `log.md`.
+5. This file is gitignored and local-only. It exists as a safety net so that if the session ends without an explicit save, the next `bookkeeping` run will flush it into the `analysis.json` `log` array.
 
 ### Step 4: Update Reports (when the developer says they're done)
 
 When the developer indicates the session is over (or asks you to save progress):
 
 **JSON update:**
-- Overwrite `report.json` in place with any updated triage status, observations, or fix info.
+- Overwrite `analysis.json` in place with any updated triage status, observations, or fix info.
 - Set `manually_investigated` to `true`.
+- **Append a log entry** to the `log` array (do NOT overwrite previous entries):
+  ```json
+  {
+    "heading": "<ISO 8601 timestamp> — <platform> — manual investigation",
+    "body": "<what was attempted, discovered, and changed>"
+  }
+  ```
 - Write atomically (`.tmp` then rename).
 
-**Log — append a new session entry to `log.md`:**
-- Do NOT overwrite previous entries — append only.
-- Add a new `## <timestamp> — <platform> — manual investigation` section.
-- Record: what was attempted, what was discovered, what changed.
+**GitHub data update:**
+- Update `github.json` with the fresh issue/comments data fetched in Step 1b.
 
 **Markdown update:**
-- Overwrite `report.md` with the latest findings, following the **learning-focused format** defined in `diagnose-and-fix` Step 9.
+- Overwrite `analysis.md` with the latest findings, following the **learning-focused format** defined in `diagnose-and-fix` Step 9.
 - The report should teach the reader about the code, not just document the bug. Include a "How the Code Works" section explaining the relevant subsystem, key types, call chains, and design decisions — with file paths and line numbers.
 - Clearly mark what is NEW from this session vs. carried over from prior work.
 
 ### Step 5: Commit
 
-**Triage repo:** Commit and push triage repo changes (report.json, report.md, log.md) as usual.
+**Triage repo:** Commit and push triage repo changes (github.json, analysis.json, analysis.md) as usual.
 
 Commit with message: `continue: <owner>/<repo>#<number> — <summary of new findings>`
 
@@ -166,8 +172,8 @@ Do NOT include `Co-authored-by: Copilot` in commit messages.
 
 - [ ] All prior context was loaded and presented in the briefing
 - [ ] Developer was NOT preempted — no autonomous investigation
-- [ ] When saving: session entry appended to `log.md` (not overwriting prior entries)
-- [ ] When saving: `manually_investigated` set to `true`
+- [ ] When saving: log entry appended to `analysis.json` `log` array (not overwriting prior entries)
+- [ ] When saving: `manually_investigated` set to `true` in `analysis.json`
 - [ ] Source repos back on main branch (all repos touched, not just the issue's repo)
 - [ ] Results committed to triage repo
 
@@ -176,7 +182,7 @@ Do NOT include `Co-authored-by: Copilot` in commit messages.
 | Pitfall | Solution |
 |---------|----------|
 | Jumping into investigation without being asked | STOP after the briefing — wait for developer direction |
-| Missing new GitHub comments | Compare `fetched_at_utc` with comment dates |
+| Missing new GitHub comments | Compare `comments.fetched_at` in `github.json` with latest comment dates |
 | Can't find the repo | Provide `repo` explicitly if auto-detection fails |
 | Repro folder is huge | Don't re-read dumps — summarize what files exist |
 | Forgetting to save | Remind the developer to save progress before ending the session |

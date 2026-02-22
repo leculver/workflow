@@ -43,7 +43,7 @@ Invoke `bookkeeping` to pull the triage repo and flush any pending `.bookkeeping
 1. Read `config/repos.json` to get the list of configured repos.
 2. If `repo` is specified, filter to just that repo.
 3. For each repo:
-   a. Read all `issues/<owner>-<repo>/*/report.json` files.
+   a. Read all `issues/<owner>-<repo>/*/analysis.json` files.
    b. Read all sprint runs from `runs/` for this repo.
 
 ### Step 2: Compute Statistics

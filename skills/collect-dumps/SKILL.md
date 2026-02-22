@@ -127,6 +127,7 @@ The size cost is worth it — a dump you can't analyze is worthless.
 - The default dump path is `/tmp/coredump.<pid>` if `DOTNET_DbgMiniDumpName` is not set.
 - Rename output files to `.dmp` extension if the template doesn't include it.
 - Ensure the target directory exists and is writable by the process user.
+- **Do NOT set `ulimit -c` or modify `/proc/sys/kernel/core_pattern`.** The .NET runtime's `createdump` tool handles dump generation entirely on its own — it does not use the kernel's core dump mechanism. Setting kernel core flags or `ulimit` is always wrong: it either has no effect (because `createdump` ignores it) or produces a second, redundant kernel core dump alongside the one `createdump` already wrote. Only use the `DOTNET_*` environment variables above.
 
 ### Windows
 - `DOTNET_EnableCrashReport` is not supported — omit it or leave it set (it's ignored).

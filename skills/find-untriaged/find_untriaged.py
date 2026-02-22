@@ -27,12 +27,12 @@ def get_open_issues(owner, repo):
 
 
 def get_triaged_issues(issues_dir, dir_name):
-    """Scan issues/<owner>-<repo>/ for folders with report.json."""
+    """Scan issues/<owner>-<repo>/ for folders with analysis.json."""
     repo_dir = os.path.join(issues_dir, dir_name)
     triaged = set()
     if os.path.isdir(repo_dir):
         for entry in os.listdir(repo_dir):
-            report = os.path.join(repo_dir, entry, "report.json")
+            report = os.path.join(repo_dir, entry, "analysis.json")
             if os.path.isfile(report):
                 try:
                     triaged.add(int(entry))

@@ -65,12 +65,24 @@ Invoke `bookkeeping` to pull the triage repo and flush any pending `.bookkeeping
 
 1. Use GitHub MCP tools to fetch the full issue: title, body, labels, assignees, all comments.
 2. Check for open PRs that reference this issue.
-3. Record `fetched_at_utc` timestamp.
+3. Write `issues/<owner>-<repo>/<issue_number>/github.json` with the raw API responses:
+   ```json
+   {
+     "issue": {
+       "fetched_at": "<ISO 8601 timestamp>",
+       "data": { /* raw API response from issue_read(get) */ }
+     },
+     "comments": {
+       "fetched_at": "<ISO 8601 timestamp>",
+       "data": [ /* raw API response from issue_read(get_comments) */ ]
+     }
+   }
+   ```
 4. Record `assignees` — the list of GitHub usernames assigned to the issue at fetch time.
 
 ### Step 4: Check Prior Work
 
-1. Check if `issues/<owner>-<repo>/<issue_number>/report.json` exists.
+1. Check if `issues/<owner>-<repo>/<issue_number>/analysis.json` exists.
 2. If it does, read it — this issue was previously triaged.
 3. **Platform reprocess check:** If the prior report has `triage.status == "platform-blocked"` and `triage.requires_platform` matches the current OS, this is a platform reprocess. In this case:
    - Preserve all prior observations — append new findings, don't replace prior work.
@@ -158,29 +170,28 @@ If you skipped reproduction or fixing, you MUST document the specific reason in 
 
 ### Step 9: Write Reports
 
-1. **Write JSON report** to `issues/<owner>-<repo>/<issue_number>/report.json`:
+1. **Update `github.json`** at `issues/<owner>-<repo>/<issue_number>/github.json`:
+   - Should already exist from Step 3. If not, write it now with the fetched issue and comments data.
+   - Write atomically (`.tmp` then rename).
+
+2. **Write analysis report** to `issues/<owner>-<repo>/<issue_number>/analysis.json`:
    - Follow the [JSON schema](references/json-schema.md).
    - This is always the single source of truth — overwrite in place.
    - Write atomically (`.tmp` then rename).
    - Set `manually_investigated` to `false` (automated triage).
-
-3. **Append to log** at `issues/<owner>-<repo>/<issue_number>/log.md`:
-   - Append a timestamped session entry (do NOT overwrite previous entries).
-   - Record: session date/time, platform, what was attempted, what was discovered, what changed.
-   - Format:
-     ```markdown
-     ## <ISO 8601 timestamp> — <platform> — automated triage
-     
-     **Actions:** <what was done>
-     **Findings:** <what was discovered>
-     **Status change:** <old status> → <new status> (if changed)
-     **Fix:** <fix summary if any>
+   - **Append a log entry** to the `log` array (do NOT overwrite previous entries):
+     ```json
+     {
+       "heading": "<ISO 8601 timestamp> — <platform> — automated triage",
+       "body": "**Actions:** <what was done>\n**Findings:** <what was discovered>\n**Status change:** <old> → <new>\n**Fix:** <fix summary if any>"
+     }
      ```
-   - If this is the first session, create the file with a `# Log: <repo>#<issue_number>` header.
+   - If this is the first session, initialize the `log` array with this entry.
+   - If `analysis.json` already exists (re-triage), read it first and append to the existing `log` array.
 
-4. **Write Markdown report** to `issues/<owner>-<repo>/<issue_number>/report.md`:
+3. **Write Markdown report** to `issues/<owner>-<repo>/<issue_number>/analysis.md`:
 
-   The report.md is **not just a triage record** — it is a **learning document**. The reader is a developer who wants to understand the codebase through the lens of this issue. Every report should leave the reader knowing more about how the code works than they did before. Keep all triage/status/fix information, but shift the center of gravity toward explaining the code.
+   The analysis.md is **not just a triage record** — it is a **learning document**. The reader is a developer who wants to understand the codebase through the lens of this issue. Every report should leave the reader knowing more about how the code works than they did before. Keep all triage/status/fix information, but shift the center of gravity toward explaining the code.
 
    **Required sections (in order):**
 
@@ -201,7 +212,7 @@ If you skipped reproduction or fixing, you MUST document the specific reason in 
    - **Investigation Trail:** Observations and reproduction steps (same as today).
    - **Artifacts:** Dump files, repro code, etc. (same as today).
    - **Key Comments:** Notable GitHub comments (same as today).
-   - **Log link:** `[Log](log.md)`
+   - **Log:** Investigation history is stored in `analysis.json` under the `log` array — no separate file.
 
    **Tone and depth guidelines:**
    - Write as if explaining to a teammate who is smart but unfamiliar with this part of the code.
@@ -215,10 +226,10 @@ If you skipped reproduction or fixing, you MUST document the specific reason in 
 ### Step 10: Commit Results
 
 1. Stage the new/updated files in the triage repo:
-   - `issues/<owner>-<repo>/<issue_number>/report.json`
-   - `issues/<owner>-<repo>/<issue_number>/report.md`
+   - `issues/<owner>-<repo>/<issue_number>/github.json`
+   - `issues/<owner>-<repo>/<issue_number>/analysis.json`
+   - `issues/<owner>-<repo>/<issue_number>/analysis.md`
    - `issues/<owner>-<repo>/<issue_number>/repro/` (repro source code and regeneration script — NOT dumps)
-   - `issues/<owner>-<repo>/<issue_number>/log.md`
    - Updated `runs/*/run.json` (if queue was modified)
 2. Commit with message: `triage: <owner>/<repo>#<number> — <status> (<category>)`
 3. Example: `triage: dotnet/diagnostics#5632 — reproduced (feature-request)`
@@ -227,9 +238,9 @@ If you skipped reproduction or fixing, you MUST document the specific reason in 
 
 ## Validation
 
-- [ ] `report.json` is valid JSON matching the schema
-- [ ] `report.md` exists and has content
-- [ ] Session entry appended to `log.md`
+- [ ] `github.json` is valid JSON with raw API data and `fetched_at` timestamps
+- [ ] `analysis.json` is valid JSON matching the schema, with log entry appended
+- [ ] `analysis.md` exists and has content
 - [ ] Reproduction was attempted (or a valid skip reason is documented)
 - [ ] Fix was attempted (or a valid skip reason is documented)
 - [ ] Tests were run against any fix candidate
@@ -248,7 +259,7 @@ If you skipped reproduction or fixing, you MUST document the specific reason in 
 | Repo not in config | Run `add-repo` first |
 | No active sprint | Run `find-untriaged` to discover untriaged issues |
 | Left source repo on wrong branch | Always `git checkout main` in every repo touched when done |
-| Lost context from prior sessions | Append to `log.md`, never overwrite it |
+| Lost context from prior sessions | Append to `analysis.json` `log` array, never overwrite prior entries |
 | Full test suite run | Only run targeted tests — full suite takes 50+ min |
 | Fix created in wrong repo | Use `affected_repo` to determine where the root cause is — the issue's repo is where it was reported, not necessarily where the fix belongs |
 | Investigation limited to one repo | Follow the code across repo boundaries using `related_repos` local paths — stack traces, function calls, and shared interfaces often cross repos |

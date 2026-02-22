@@ -63,23 +63,23 @@ If the script returned any `logs` entries:
 
 For each issue in the `logs` array:
 
-**a) Append to log:**
+**a) Append to analysis.json log:**
 
-1. Read the existing `log.md` for this issue.
-2. Append a new session entry:
-   ```markdown
-   ## <current ISO 8601 timestamp> — <platform> — flushed from .bookkeeping/
-
-   <combined contents of all .log files for this issue, in chronological order>
+1. Read the existing `analysis.json` for this issue.
+2. Append a new log entry to the `log` array:
+   ```json
+   {
+     "heading": "<current ISO 8601 timestamp> — <platform> — flushed from .bookkeeping/",
+     "body": "<combined contents of all .log files for this issue, in chronological order>"
+   }
    ```
-3. Write `log.md`.
+3. Write `analysis.json` atomically.
 
-**b) Update report.json if applicable:**
+**b) Update analysis.json triage fields if applicable:**
 
-1. Read the existing `report.json`.
-2. If any log file contains structured updates (status changes, new observations, fix info), apply them.
-3. Most progress notes are freeform — don't force-parse them. Only update `report.json` if there are clear, explicit status changes noted in the progress.
-4. Write atomically (`.tmp` then rename).
+1. If any log file contains structured updates (status changes, new observations, fix info), apply them to the triage/fix/reproduction sections.
+2. Most progress notes are freeform — don't force-parse them. Only update fields if there are clear, explicit status changes noted in the progress.
+3. Write atomically (`.tmp` then rename).
 
 **c) Clean up:**
 
@@ -104,11 +104,10 @@ Based on the user's response:
 
 ### Step 5: Commit
 
-If any log.md or report.json files were updated:
+If any analysis.json files were updated:
 
 1. `git add` the changed files.
 2. Commit: `bookkeeping: flush progress for <owner>/<repo>#<number>` (one commit per issue, or batch if multiple).
-3. Push to origin.
 
 Do NOT include `Co-authored-by: Copilot` in commit messages.
 
@@ -147,7 +146,7 @@ Items with no `delete_after` (retained forever) should not be added to `.delete`
 ## Validation
 
 - [ ] All `.bookkeeping/*.log` files were renamed before reading (handled by Python script)
-- [ ] Contents appended to `log.md` (not overwriting prior entries)
+- [ ] Log entry appended to `analysis.json` `log` array (not overwriting prior entries)
 - [ ] `.flushing.log` files deleted after successful append
 - [ ] Expired deletion reminders presented to user (not auto-deleted)
 - [ ] Changes committed and pushed
@@ -159,7 +158,7 @@ Items with no `delete_after` (retained forever) should not be added to `.delete`
 |---------|----------|
 | File disappeared during rename | Another session flushed it — skip silently (handled by script) |
 | `.flushing.log` files left behind from crash | Pick them up on next run — they're already claimed |
-| Overwriting log.md | Always append, never overwrite |
-| Committing .bookkeeping/ files | `.bookkeeping/` is in `.gitignore` — only `log.md` and `report.json` are committed |
+| Overwriting log entries | Always append to `analysis.json` `log` array, never overwrite |
+| Committing .bookkeeping/ files | `.bookkeeping/` is in `.gitignore` — only `analysis.json`, `analysis.md`, and `github.json` are committed |
 | Large number of issues with progress | Batch commits if flushing more than 3 issues |
 | Auto-deleting expired files | NEVER auto-delete — always ask the user first |

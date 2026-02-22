@@ -12,7 +12,7 @@ Arguments:
     prs_json          Path to a JSON file containing open PR data with linked issues
 
 The reports_json file should be an array of objects:
-    [{"number": 123, "has_report_md": true, "data": <report.json contents>}, ...]
+    [{"number": 123, "has_analysis_md": true, "data": <analysis.json contents>, "github": <github.json contents or null>}, ...]
 
 The prs_json file should be an array of objects:
     [{"number": 456, "url": "...", "title": "...", "author": "...", "linked_issues": [123, 789]}, ...]
@@ -93,8 +93,10 @@ def main():
             text = text[: maxlen - 3] + "..."
         return text
 
-    def escape_pipe(text):
-        return (text or "").replace("|", "&#124;")
+    def escape_md(text):
+        text = (text or "").replace("|", "&#124;")
+        text = text.replace("<", "&lt;").replace(">", "&gt;")
+        return text
 
     def act_icon(act):
         return {"high": "🔴", "medium": "🟡"}.get(act, "⚪")
@@ -105,28 +107,40 @@ def main():
     class IssueRow:
         def __init__(self, r):
             d = r["data"]
+            gh = r.get("github") or {}
             self.number = r["number"]
-            self.has_report_md = r["has_report_md"]
-            issue = d.get("issue", {})
+            self.has_analysis_md = r.get("has_analysis_md", r.get("has_report_md", False))
+
+            # Get issue data from github.json if available, fall back to analysis.json legacy fields
+            gh_issue = (gh.get("issue", {}).get("data") or {}) if gh else {}
             triage = d.get("triage", {})
             fix = d.get("fix", {})
 
-            # Support both nested (new) and flat (old) report schemas
-            if issue:
-                self.title = issue.get("title", "")
-                self.state = issue.get("state", "open")
-                self.url = issue.get("url", f"https://github.com/{owner}/{repo_name}/issues/{self.number}")
-                self.labels = issue.get("labels", [])
-                self.manually_investigated = issue.get("manually_investigated", False)
-                self.assignees = issue.get("assignees", [])
+            if gh_issue:
+                self.title = gh_issue.get("title", "")
+                self.state = gh_issue.get("state", "open")
+                self.url = gh_issue.get("html_url", gh_issue.get("url", f"https://github.com/{owner}/{repo_name}/issues/{self.number}"))
+                self.labels = gh_issue.get("labels", [])
+                self.assignees = [a.get("login", a) if isinstance(a, dict) else a for a in gh_issue.get("assignees", [])]
             else:
-                self.title = d.get("title", "")
-                self.state = d.get("state", "open")
-                self.url = d.get("url", f"https://github.com/{owner}/{repo_name}/issues/{self.number}")
-                self.labels = d.get("labels", [])
-                self.manually_investigated = d.get("manually_investigated", False)
-                assignee = d.get("assignee", "")
-                self.assignees = d.get("assignees", [assignee] if assignee else [])
+                # Legacy: issue data was in analysis.json (pre-migration)
+                issue = d.get("issue", {})
+                if issue:
+                    self.title = issue.get("title", "")
+                    self.state = issue.get("state", "open")
+                    self.url = issue.get("url", f"https://github.com/{owner}/{repo_name}/issues/{self.number}")
+                    self.labels = issue.get("labels", [])
+                    self.assignees = issue.get("assignees", [])
+                else:
+                    self.title = d.get("title", "")
+                    self.state = d.get("state", "open")
+                    self.url = d.get("url", f"https://github.com/{owner}/{repo_name}/issues/{self.number}")
+                    self.labels = d.get("labels", [])
+                    assignee = d.get("assignee", "")
+                    self.assignees = d.get("assignees", [assignee] if assignee else [])
+
+            # manually_investigated moved to triage in new schema
+            self.manually_investigated = triage.get("manually_investigated", d.get("issue", {}).get("manually_investigated", False))
 
             if triage:
                 self.category = triage.get("category", "")
@@ -151,8 +165,8 @@ def main():
             self.prs = issue_to_prs.get(self.number, [])
 
         def report_link(self):
-            if self.has_report_md:
-                return f"[{self.number}](../../issues/{repo_key}/{self.number}/report.md)"
+            if self.has_analysis_md:
+                return f"[{self.number}](../../issues/{repo_key}/{self.number}/analysis.md)"
             return str(self.number)
 
         def github_link(self):
@@ -170,7 +184,7 @@ def main():
             return (
                 f"| {self.report_link()} "
                 f"| {self.github_link()} "
-                f"| {escape_pipe(self.title)} "
+                f"| {escape_md(self.title)} "
                 f"| {state_icon(self.state)} "
                 f"| {act_icon(self.actionability)} "
                 f"| {self.assignees_str()} "
@@ -178,7 +192,7 @@ def main():
                 f'| {"✅" if self.has_fix else ""} '
                 f'| {"🔍" if self.manually_investigated else ""} '
                 f"| {self.status} "
-                f"| {escape_pipe(truncate(self.status_reason))} |"
+                f"| {escape_md(truncate(self.status_reason))} |"
             )
 
         def to_blocked_row(self):
@@ -186,12 +200,12 @@ def main():
             return (
                 f"| {self.report_link()} "
                 f"| {self.github_link()} "
-                f"| {escape_pipe(self.title)} "
+                f"| {escape_md(self.title)} "
                 f"| {state_icon(self.state)} "
                 f"| {act_icon(self.actionability)} "
                 f"| {self.assignees_str()} "
-                f"| {escape_pipe(truncate(blocked_on))} "
-                f"| {escape_pipe(truncate(self.status_reason))} |"
+                f"| {escape_md(truncate(blocked_on))} "
+                f"| {escape_md(truncate(self.status_reason))} |"
             )
 
     # Classify
@@ -279,7 +293,7 @@ def main():
         lines += ["| PR | Author | Title | Linked Issues |", "|----|--------|-------|---------------|"]
         for pr in prs:
             linked = ", ".join(f'[#{n}](https://github.com/{owner}/{repo_name}/issues/{n})' for n in pr.get("linked_issues", []))
-            lines.append(f"| [#{pr['number']}]({pr['url']}) | {pr['author']} | {escape_pipe(pr['title'])} | {linked} |")
+            lines.append(f"| [#{pr['number']}]({pr['url']}) | {pr['author']} | {escape_md(pr['title'])} | {linked} |")
         lines.append("")
     else:
         lines += ["No open pull requests.", ""]

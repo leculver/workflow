@@ -1,7 +1,7 @@
 ---
 name: find-untriaged
 description: >
-  Finds open GitHub issues that have not been triaged yet (no report.json in their issue folder).
+  Finds open GitHub issues that have not been triaged yet (no analysis.json in their issue folder).
   Queries all configured repos by default, or a single repo if specified. Outputs a summary
   with counts and issue lists. Use when you want to see what new work exists before starting
   a sprint, or to check coverage gaps.
@@ -42,7 +42,7 @@ python .agents/skills/find-untriaged/find_untriaged.py [--repo owner/repo] [--sh
 The script:
 1. Reads `config/repos.json` for the repo list
 2. Calls `gh api --paginate` to get all open issues per repo
-3. Scans `issues/<owner>-<repo>/*/report.json` for triaged issues
+3. Scans `issues/<owner>-<repo>/*/analysis.json` for triaged issues
 4. Prints a concise summary to stdout (10 newest untriaged per repo by default)
 5. Writes full JSON data to a temp file (path printed at the end)
 

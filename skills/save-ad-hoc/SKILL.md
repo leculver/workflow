@@ -4,7 +4,7 @@ description: >
   Saves an ad-hoc investigation note from the current conversation to the notes/ directory. Use when the
   user says "save this as a note", "save note", or "note this". Captures only the relevant recent topic
   from the conversation, not prior unrelated context. Does NOT save issue-specific findings — those belong
-  in the issue's report.json/report.md via diagnose-and-fix or load-issue.
+  in the issue's analysis.json/analysis.md via diagnose-and-fix or load-issue.
 ---
 
 # Save Ad-Hoc Note
