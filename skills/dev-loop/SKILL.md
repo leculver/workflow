@@ -270,7 +270,7 @@ $WorkRepo = "<work_repo_root>"
 function Save-LoopNote {
     param([string]$Outcome)
     $date = Get-Date -Format "yyyy_MM_dd"
-    $notesDir = Join-Path $WorkRepo "notes" $RepoName
+    $notesDir = Join-Path $WorkRepo "docs" "notes" $RepoName
     if (-not (Test-Path $notesDir)) { New-Item -ItemType Directory -Path $notesDir -Force | Out-Null }
     $noteFile = Join-Path $notesDir "${date}_${Feature}.md"
 
@@ -310,8 +310,8 @@ function Save-LoopNote {
     # Commit and push from work repo
     Push-Location $WorkRepo
     try {
-        git add "notes/$RepoName" 2>$null
-        git commit -m "notes/${RepoName}: ${Feature}" --quiet 2>$null
+        git add "docs/notes/$RepoName" 2>$null
+        git commit -m "docs/notes/${RepoName}: ${Feature}" --quiet 2>$null
         git push --quiet 2>$null
         Write-Host "📤 Pushed to work repo."
     } catch {
@@ -469,7 +469,7 @@ save_note() {
     local outcome="$1"
     local date_slug
     date_slug=$(date "+%Y_%m_%d")
-    local notes_dir="$WORK_REPO/notes/$REPO_NAME"
+    local notes_dir="$WORK_REPO/docs/notes/$REPO_NAME"
     mkdir -p "$notes_dir"
     local note_file="$notes_dir/${date_slug}_${FEATURE}.md"
 
@@ -502,8 +502,8 @@ save_note() {
 
     # Commit and push from work repo
     cd "$WORK_REPO" || return
-    git add "notes/$REPO_NAME" 2>/dev/null
-    git commit -m "notes/${REPO_NAME}: ${FEATURE}" --quiet 2>/dev/null
+    git add "docs/notes/$REPO_NAME" 2>/dev/null
+    git commit -m "docs/notes/${REPO_NAME}: ${FEATURE}" --quiet 2>/dev/null
     git push --quiet 2>/dev/null && echo "📤 Pushed to work repo." || echo "⚠️ Could not push note."
     cd "$REPO_ROOT"
 }
@@ -672,7 +672,7 @@ markdown note using the `save-ad-hoc` skill conventions:
 
 1. Read `progress.log` — each line is a timestamped summary of one iteration.
 2. Read `PLAN.md` — shows final task status.
-3. Write a note to `notes/<repo>/YYYY_MM_DD_<feature>.md` containing:
+3. Write a note to `docs/notes/<repo>/YYYY_MM_DD_<feature>.md` containing:
    - The goal
    - The progress log (formatted as a markdown list)
    - Final plan status (tasks completed vs remaining)

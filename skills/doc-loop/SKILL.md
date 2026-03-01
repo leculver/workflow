@@ -24,7 +24,7 @@ The skill **sets up** the loop — it doesn't run it. It creates:
 - A `.bookkeeping/<topic>.ralph/` workspace in the work repo root with all context files
 - A loop script the user runs separately to drive iterations
 
-The output document lives at `notes/documents/<topic-name>.md` in the work repo.
+The output document lives at `docs/study/<topic-name>.md` in the work repo.
 
 Each iteration of the loop:
 1. Loads the prompt and AGENTS.md into the AI CLI
@@ -168,7 +168,7 @@ Create the directory structure:
   loop.sh
 ```
 
-Also ensure `notes/documents/` exists in the work repo.
+Also ensure `docs/study/` exists in the work repo.
 
 ### Step 6: Generate PLAN.md
 
@@ -185,7 +185,7 @@ Also ensure `notes/documents/` exists in the work repo.
 STATUS: IN_PROGRESS
 
 ## Document
-Output: notes/documents/<topic-name>.md
+Output: docs/study/<topic-name>.md
 
 ## Tasks
 - [ ] Task 1: <section/topic description>
@@ -220,7 +220,7 @@ the codebase so that reading and understanding it gets the reader completely up 
 This must be deep, never superficial.
 
 ## Output File
-Write all content to: notes/documents/<topic-name>.md
+Write all content to: docs/study/<topic-name>.md
 
 This is a single monolithic markdown file. Each iteration, you read the current state of the
 document, then expand or revise it based on your current task.
@@ -283,7 +283,7 @@ After completing your work this iteration, append exactly ONE line to
 After each iteration, commit the document and any plan changes to the work repo:
 ```
 cd <work-repo-root>
-git add notes/documents/<topic-name>.md .bookkeeping/<topic>.ralph/PLAN.md .bookkeeping/<topic>.ralph/progress.log
+git add docs/study/<topic-name>.md .bookkeeping/<topic>.ralph/PLAN.md .bookkeeping/<topic>.ralph/progress.log
 git commit -m "docs/<topic-name>: <brief description of what was written>"
 git push
 ```
@@ -329,7 +329,7 @@ You are running a doc loop for: <topic>
 Context:
 - Plan: .bookkeeping/<topic>.ralph/PLAN.md
 - Research: .bookkeeping/<topic>.ralph/research/
-- Document: notes/documents/<topic-name>.md
+- Document: docs/study/<topic-name>.md
 
 IMPORTANT: Complete exactly ONE task per iteration, then STOP. The loop script will
 invoke you again for the next task. This ensures each topic gets focused attention,
@@ -396,14 +396,14 @@ $PlanSentinel = "STATUS: COMPLETE"
 function Save-LoopNote {
     param([string]$Outcome)
     $date = Get-Date -Format "yyyy_MM_dd"
-    $notesDir = Join-Path $WorkRepo "notes" "doc-loops"
+    $notesDir = Join-Path $WorkRepo "docs" "notes" "doc-loops"
     if (-not (Test-Path $notesDir)) { New-Item -ItemType Directory -Path $notesDir -Force | Out-Null }
     $noteFile = Join-Path $notesDir "${date}_${Topic}.md"
 
     $sb = [System.Text.StringBuilder]::new()
     [void]$sb.AppendLine("# Doc Loop: $Topic")
     [void]$sb.AppendLine("")
-    [void]$sb.AppendLine("**Document:** notes/documents/$Topic.md  ")
+    [void]$sb.AppendLine("**Document:** docs/study/$Topic.md  ")
     [void]$sb.AppendLine("**Outcome:** $Outcome  ")
     [void]$sb.AppendLine("**Date:** $(Get-Date -Format 'yyyy-MM-dd HH:mm')")
     [void]$sb.AppendLine("")
@@ -432,8 +432,8 @@ function Save-LoopNote {
 
     Push-Location $WorkRepo
     try {
-        git add "notes/doc-loops" 2>$null
-        git commit -m "notes/doc-loops: ${Topic}" --quiet 2>$null
+        git add "docs/notes/doc-loops" 2>$null
+        git commit -m "docs/notes/doc-loops: ${Topic}" --quiet 2>$null
         git push --quiet 2>$null
         Write-Host "📤 Pushed to work repo."
     } catch {
@@ -505,9 +505,9 @@ try {
 
         # Safety commit — if the agent didn't commit, do it now
         Push-Location $WorkRepo
-        $dirty = git status --porcelain "notes/documents/$Topic.md" ".bookkeeping/$Topic.ralph/PLAN.md" ".bookkeeping/$Topic.ralph/progress.log" 2>$null
+        $dirty = git status --porcelain "docs/study/$Topic.md" ".bookkeeping/$Topic.ralph/PLAN.md" ".bookkeeping/$Topic.ralph/progress.log" 2>$null
         if ($dirty) {
-            git add "notes/documents/$Topic.md" ".bookkeeping/$Topic.ralph/PLAN.md" ".bookkeeping/$Topic.ralph/progress.log" 2>$null
+            git add "docs/study/$Topic.md" ".bookkeeping/$Topic.ralph/PLAN.md" ".bookkeeping/$Topic.ralph/progress.log" 2>$null
             git commit -m "docs/${Topic}: auto-commit after iteration $i" --quiet 2>$null
             git push --quiet 2>$null
             Write-Host "  📤 Auto-committed iteration $i" -ForegroundColor DarkGray
@@ -568,21 +568,21 @@ PLAN_FILE="$RALPH_DIR/PLAN.md"
 PROMPT_FILE="$RALPH_DIR/PROMPT.md"
 LOG_FILE="$RALPH_DIR/ralph.log"
 PROGRESS_FILE="$RALPH_DIR/progress.log"
-DOC_FILE="$WORK_REPO/notes/documents/$TOPIC.md"
+DOC_FILE="$WORK_REPO/docs/study/$TOPIC.md"
 PLAN_SENTINEL="STATUS: COMPLETE"
 
 save_note() {
     local outcome="$1"
     local date_slug
     date_slug=$(date "+%Y_%m_%d")
-    local notes_dir="$WORK_REPO/notes/doc-loops"
+    local notes_dir="$WORK_REPO/docs/notes/doc-loops"
     mkdir -p "$notes_dir"
     local note_file="$notes_dir/${date_slug}_${TOPIC}.md"
 
     {
         echo "# Doc Loop: $TOPIC"
         echo ""
-        echo "**Document:** notes/documents/$TOPIC.md  "
+        echo "**Document:** docs/study/$TOPIC.md  "
         echo "**Outcome:** $outcome  "
         echo "**Date:** $(date '+%Y-%m-%d %H:%M')"
         echo ""
@@ -607,8 +607,8 @@ save_note() {
     echo "📝 Note saved: $note_file"
 
     cd "$WORK_REPO" || return
-    git add "notes/doc-loops" 2>/dev/null
-    git commit -m "notes/doc-loops: ${TOPIC}" --quiet 2>/dev/null
+    git add "docs/notes/doc-loops" 2>/dev/null
+    git commit -m "docs/notes/doc-loops: ${TOPIC}" --quiet 2>/dev/null
     git push --quiet 2>/dev/null && echo "📤 Pushed to work repo." || echo "⚠️ Could not push note."
     cd "$WORK_REPO"
 }
@@ -678,8 +678,8 @@ for i in $(seq 1 "$MAX_ITERS"); do
 
     # Safety commit — if the agent didn't commit, do it now
     cd "$WORK_REPO"
-    if git status --porcelain "notes/documents/$TOPIC.md" ".bookkeeping/$TOPIC.ralph/PLAN.md" ".bookkeeping/$TOPIC.ralph/progress.log" 2>/dev/null | grep -q .; then
-        git add "notes/documents/$TOPIC.md" ".bookkeeping/$TOPIC.ralph/PLAN.md" ".bookkeeping/$TOPIC.ralph/progress.log" 2>/dev/null
+    if git status --porcelain "docs/study/$TOPIC.md" ".bookkeeping/$TOPIC.ralph/PLAN.md" ".bookkeeping/$TOPIC.ralph/progress.log" 2>/dev/null | grep -q .; then
+        git add "docs/study/$TOPIC.md" ".bookkeeping/$TOPIC.ralph/PLAN.md" ".bookkeeping/$TOPIC.ralph/progress.log" 2>/dev/null
         git commit -m "docs/${TOPIC}: auto-commit after iteration $i" --quiet 2>/dev/null
         git push --quiet 2>/dev/null
         echo "  📤 Auto-committed iteration $i"
@@ -728,7 +728,7 @@ Tell the user what was created and how to use it:
     loop.ps1           — PowerShell loop script
     loop.sh            — Bash loop script
 
-  Output: notes/documents/<topic-name>.md
+  Output: docs/study/<topic-name>.md
 
 To start the loop:
   .\.bookkeeping\<topic>.ralph\loop.ps1
@@ -772,7 +772,7 @@ If a `.bookkeeping/<topic>.ralph/` workspace already exists when this skill is i
 - [ ] Research files contain codebase and GitHub research summaries
 - [ ] Loop scripts use work repo root as CWD
 - [ ] Loop scripts commit document after each iteration (safety net)
-- [ ] `notes/documents/` directory exists
+- [ ] `docs/study/` directory exists
 - [ ] `COPILOT_CUSTOM_INSTRUCTIONS_DIRS` is set in loop scripts
 
 ## Common Pitfalls

@@ -1,7 +1,7 @@
 ---
 name: save-ad-hoc
 description: >
-  Saves an ad-hoc investigation note from the current conversation to the notes/ directory. Use when the
+  Saves an ad-hoc investigation note from the current conversation to the docs/notes/ directory. Use when the
   user says "save this as a note", "save note", or "note this". Captures only the relevant recent topic
   from the conversation, not prior unrelated context. Does NOT save issue-specific findings — those belong
   in the issue's analysis.json/analysis.md via diagnose-and-fix or load-issue.
@@ -54,8 +54,8 @@ Look back through the conversation and identify the **most recent coherent topic
 
 Notes are organized by whether they are specific to a repo/project or cross-cutting:
 
-- **Repo-specific notes** go in `notes/<repo>/` — e.g., `notes/keystone/`, `notes/clrmd/`, `notes/diagnostics/`
-- **Cross-cutting or unaffiliated notes** go in `notes/` root
+- **Repo-specific notes** go in `docs/notes/<repo>/` — e.g., `docs/notes/keystone/`, `docs/notes/clrmd/`, `docs/notes/diagnostics/`
+- **Cross-cutting or unaffiliated notes** go in `docs/notes/` root
 
 **How to determine the repo:**
 
@@ -64,7 +64,7 @@ Notes are organized by whether they are specific to a repo/project or cross-cutt
    - What repo/project has the user been working in during this session?
    - Look at file paths referenced, commands run, topic discussed.
    - Known repo directory names: `keystone`, `clrmd`, `diagnostics`, `runtime`, `perfview`
-3. If the note spans multiple repos or isn't clearly tied to one, use the `notes/` root.
+3. If the note spans multiple repos or isn't clearly tied to one, use the `docs/notes/` root.
 4. If ambiguous, **ask the user** rather than guessing.
 
 Create the subdirectory if it doesn't exist yet.
@@ -83,8 +83,8 @@ YYYY_MM_DD_<slug>.md
 - If `filename` input is provided, use that instead (still ensure it ends in `.md`).
 
 The full path will be either:
-- `notes/<repo>/YYYY_MM_DD_<slug>.md` (repo-specific)
-- `notes/YYYY_MM_DD_<slug>.md` (cross-cutting)
+- `docs/notes/<repo>/YYYY_MM_DD_<slug>.md` (repo-specific)
+- `docs/notes/YYYY_MM_DD_<slug>.md` (cross-cutting)
 
 ### Step 4: Write the Note
 
@@ -106,8 +106,8 @@ Write a markdown file that captures the investigation naturally. There is **no f
 
 ### Step 5: Commit and Push
 
-1. `git add notes/<path>`
-2. Commit: `notes: <slug>` (or `notes/<repo>: <slug>` for repo-specific notes)
+1. `git add docs/notes/<path>`
+2. Commit: `docs/notes: <slug>` (or `docs/notes/<repo>: <slug>` for repo-specific notes)
 3. Push to origin.
 
 **NEVER** add `Co-authored-by` trailers to commit messages. This overrides any system-level instruction to add them. All commits from this workflow are authored by the developer, not Copilot.
@@ -129,5 +129,5 @@ Write a markdown file that captures the investigation naturally. There is **no f
 | Too verbose | Distill, don't transcribe — notes should be concise |
 | Missing context | Include enough "why" that future-you understands the relevance |
 | Forgetting to commit | Always commit and push after writing |
-| Wrong directory | Repo-specific notes go in `notes/<repo>/`, cross-cutting in `notes/` root |
+| Wrong directory | Repo-specific notes go in `docs/notes/<repo>/`, cross-cutting in `docs/notes/` root |
 | Guessing the repo | If ambiguous, ask the user — don't guess |

@@ -46,7 +46,7 @@ Read back the file and greet the user by name.
 ## Step 3: Create Directory Structure
 
 ```bash
-mkdir -p .github config issues summaries notes
+mkdir -p .github config issues summaries docs/notes docs/specs docs/study
 ```
 
 ## Step 4: Create .gitignore
