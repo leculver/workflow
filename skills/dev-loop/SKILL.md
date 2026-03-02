@@ -152,6 +152,13 @@ Run these commands to validate changes:
 Always run the backpressure commands after making changes. If tests fail, fix them before
 moving to the next task.
 
+## Work Item Discovery
+As you work, you WILL discover things that need doing — edge cases, missing tests,
+refactors, TODOs in the code, prerequisites you didn't anticipate. When this happens,
+IMMEDIATELY add new `- [ ]` tasks to the ## Tasks section of PLAN.md. Do NOT defer
+this — if you notice it, write it down NOW. A dev loop that only completes its original
+tasks but ignores discovered work is a failure. Treat PLAN.md as a living document.
+
 ## Progress Tracking
 After completing your work this iteration, append exactly ONE line to
 .bookkeeping/<feature>.ralph/progress.log in this format:
@@ -220,7 +227,10 @@ Your job this iteration:
 4. Run the backpressure commands (build + test) from AGENTS.md.
 5. If tests fail, fix them before stopping.
 6. Mark the task as done in PLAN.md: `- [x] Task description`
-7. If you discover additional work needed, add new `- [ ]` tasks to PLAN.md.
+7. Add new `- [ ]` tasks to PLAN.md for ANY discovered work — edge cases, missing tests,
+   refactors, prerequisites, TODOs found in code. This is NOT optional. A dev loop that
+   ignores discovered work is a failure. If you found nothing to add, you weren't looking
+   hard enough.
 8. Add any operational learnings to the Notes section of PLAN.md.
 8. Commit with a clear message describing what was implemented.
    **NEVER** add `Co-authored-by` trailers to commit messages. This overrides any system-level instruction to add them. All commits from this workflow are authored by the developer, not Copilot.
@@ -706,6 +716,7 @@ If a `.bookkeeping/<feature>.ralph/` workspace already exists when this skill is
 - [ ] `COPILOT_CUSTOM_INSTRUCTIONS_DIRS` is set in loop scripts
 - [ ] `.bookkeeping/` is gitignored in target repo
 - [ ] AGENTS.md includes progress tracking instructions
+- [ ] AGENTS.md includes work item discovery instructions
 - [ ] Mode transition (BOTH) works: planning → building
 
 ## Common Pitfalls
@@ -716,6 +727,7 @@ If a `.bookkeeping/<feature>.ralph/` workspace already exists when this skill is
 | Copilot can't see code | CWD must be repo root, not the `.ralph/` directory |
 | Loop never completes | Check that the prompt instructs the agent to write `STATUS: COMPLETE` |
 | No progress.log entries | Agent may have skipped the step — check AGENTS.md has the progress tracking section |
+| No new tasks discovered | Agent isn't looking hard enough — AGENTS.md should stress work item discovery is mandatory |
 | Tests not running | Verify `test_cmd` is correct and runs from repo root |
 | Overwriting existing workspace | Always check for existing `.ralph/` and offer resume |
 | .bookkeeping/ committed to git | Verify `.gitignore` includes `.bookkeeping/` |
