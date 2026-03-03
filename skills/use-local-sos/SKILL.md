@@ -27,7 +27,7 @@ Unload the pre-loaded SOS from CDB and load the locally built one from the diagn
 
 | Input | Required | Description |
 |-------|----------|-------------|
-| diagnostics_path | No | Path to the diagnostics repo checkout (default: `./diagnostics` or infer from config) |
+| diagnostics_path | No | Path to the diagnostics repo checkout (default: `./git/diagnostics` or infer from config) |
 | config | No | Build configuration: `Debug` (default) or `Release` |
 | arch | No | Architecture: `x64` (default) or `x86` |
 | dac_path | No | Path to directory containing a local `mscordaccore.dll`. Only needed when using a locally built runtime or a DAC that doesn't match the dump's runtime version. If omitted, DAC loading is skipped. |
@@ -41,8 +41,8 @@ The locally built SOS is at:
 ```
 
 Examples:
-- `diagnostics\artifacts\bin\Windows_NT.x64.Debug\sos.dll`
-- `diagnostics\artifacts\bin\Windows_NT.x86.Release\sos.dll`
+- `git/diagnostics/artifacts/bin/Windows_NT.x64.Debug/sos.dll`
+- `git/diagnostics/artifacts/bin/Windows_NT.x86.Release/sos.dll`
 
 Before using this skill, verify the SOS DLL exists at the expected path. If it doesn't, tell the user to build the diagnostics repo first.
 
@@ -54,7 +54,7 @@ Use `local-tools` to resolve the `cdb` path.
 
 ### Step 1: Determine SOS Path
 
-1. Resolve `diagnostics_path` — from input, or `./diagnostics`, or from `config/repos.json`.
+1. Resolve `diagnostics_path` — from input, or `./git/diagnostics`, or from `config/repos.json`.
 2. Build the SOS path: `<diagnostics_path>\artifacts\bin\Windows_NT.<arch>.<config>\sos.dll`
 3. Verify the file exists. If not, tell the user: "SOS not found at `<path>`. Build with `build.cmd` first."
 

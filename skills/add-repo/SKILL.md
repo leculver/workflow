@@ -27,7 +27,7 @@ Configure a new repository for the issue triage system.
 |-------|----------|-------------|
 | repo | Yes | Repository in `owner/repo` format |
 | source_path | No | Local path to the repo checkout (relative to workspace root). Default: `./<repo_name>` |
-| source_alt_path | No | Alternative checkout path (for parallel work, e.g., `./diagnostics2`) |
+| source_alt_path | No | Alternative checkout path (for parallel work, e.g., `./git/diagnostics2`) |
 | related_repos | No | Map of related repos and their local paths |
 | scope | No | Default GitHub search scope for this repo |
 | areas | No | Area classification rules (or auto-generate from labels) |
@@ -62,7 +62,7 @@ Invoke `bookkeeping` to pull the triage repo and flush any pending `.bookkeeping
 
 ### Step 2: Clone or Validate Local Checkout
 
-Determine `source_path` — use the provided value, or default to `./<repo_name>` (e.g., `./runtime` for `dotnet/runtime`).
+Determine `source_path` — use the provided value, or default to `./git/<repo_name>` (e.g., `./git/runtime` for `dotnet/runtime`).
 
 **If the directory already exists:**
 1. Verify it's a git repo (`git -C <path> rev-parse --git-dir`).
@@ -168,7 +168,7 @@ The `mode` field records whether this is a `"fork"` (org repo with user fork) or
 
 ### Step 7: Update .gitignore
 
-If the local checkout path is under the triage repo (e.g., `./clrmd`, `./diagnostics`), add it to `.gitignore` so the cloned repo isn't accidentally committed to the triage repo. Skip if already listed.
+If the local checkout path is under the triage repo (e.g., `./git/clrmd`, `./git/diagnostics`), add it to `.gitignore` so the cloned repo isn't accidentally committed to the triage repo. Skip if already listed. The standard convention is to keep all repo checkouts under `./git/` which is gitignored as a whole.
 
 ### Step 8: Create Directory Structure
 
@@ -191,7 +191,7 @@ summaries/<owner>-<repo>/
 **Fork mode:**
 ```
 Repository configured: dotnet/runtime (fork mode)
-  Local path: ./runtime
+  Local path: ./git/runtime
   Origin: <username>/runtime (fork)
   Upstream: dotnet/runtime
   Areas: 15 auto-detected from labels
