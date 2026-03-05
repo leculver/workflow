@@ -17,10 +17,11 @@ def get_open_issues(owner, repo):
         [gh, "api", "--paginate",
          f"/repos/{owner}/{repo}/issues?state=open",
          "--jq", '.[] | select(.pull_request == null) | {number, title, created_at}'],
-        capture_output=True, text=True, check=True
+        capture_output=True, text=True, encoding="utf-8", check=True
     )
     issues = []
-    for line in result.stdout.strip().split('\n'):
+    stdout = result.stdout or ""
+    for line in stdout.strip().split('\n'):
         if line:
             issues.append(json.loads(line))
     return issues
@@ -67,7 +68,7 @@ def main():
     parser.add_argument("--show", type=int, default=10, help="Max issues to show per repo (default: 10)")
     args = parser.parse_args()
 
-    with open(args.config) as f:
+    with open(args.config, encoding="utf-8") as f:
         config = json.load(f)
 
     results = []
