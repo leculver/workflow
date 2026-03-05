@@ -63,7 +63,7 @@ Notes are organized by whether they are specific to a repo/project or cross-cutt
 2. Otherwise, infer from the conversation context:
    - What repo/project has the user been working in during this session?
    - Look at file paths referenced, commands run, topic discussed.
-   - Known repo directory names: `keystone`, `clrmd`, `diagnostics`, `runtime`, `perfview`
+   - Known repo directory names (under `git/`): `keystone`, `clrmd`, `diagnostics`, `runtime`, `perfview`, `epitaph`, `vscode-copilot-evaluation`
 3. If the note spans multiple repos or isn't clearly tied to one, use the `docs/notes/` root.
 4. If ambiguous, **ask the user** rather than guessing.
 

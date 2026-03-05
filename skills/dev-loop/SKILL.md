@@ -635,7 +635,7 @@ Tell the user what was created and how to use it. Example output:
 ```
 ✅ Dev loop workspace created:
 
-  keystone/.bookkeeping/workflow-viewer.ralph/
+  git/keystone/.bookkeeping/workflow-viewer.ralph/
     AGENTS.md          — project context and backpressure commands
     PROMPT.md          — loaded each iteration (currently: planning)
     PROMPT.building.md — swapped in automatically after planning
@@ -645,7 +645,7 @@ Tell the user what was created and how to use it. Example output:
     loop.sh            — Bash loop script
 
 To start the loop:
-  cd keystone
+  cd git/keystone
   .\.bookkeeping\workflow-viewer.ralph\loop.ps1
 
 To start in building mode directly:
