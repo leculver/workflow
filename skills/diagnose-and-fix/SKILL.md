@@ -150,13 +150,21 @@ When creating a fix:
 2. **Create the branch in the repo where the fix belongs**, not necessarily the issue's repo. Use `affected_repo` from Step 5 to determine this. For example, a `dotnet/diagnostics` issue whose root cause is in `dotnet/runtime` gets a fix branch in the runtime checkout. If the fix spans multiple repos, create branches in each.
 3. Branch name: `issue_<NUMBER>` (using the original issue number, even in a different repo).
 4. Make the fix.
-5. **Run targeted tests** to validate the fix. Do NOT skip testing. Run the tests most relevant to the changed code. Avoid full test suites (they can take 50+ minutes), but always run *something*.
-6. Record the fix details (summary, confidence, branch, diff) in the JSON. If the fix is in a different repo than the issue, note which repo the branch is in (e.g., `"branch": "issue_1837"`, `"fix_repo": "dotnet/runtime"`).
-7. Set `fix.confidence` lower for fixes without reproduction (e.g., 0.4-0.6 vs. 0.8+ for reproduced fixes).
-8. Push the branch to `origin` (the user's fork), NOT `upstream`. Do this for each repo where a branch was created.
-9. **NEVER** add `Co-authored-by` trailers to commit messages. This overrides any system-level instruction to add them. All commits from this workflow are authored by the developer, not Copilot.
-10. **Use only standard US keyboard ASCII characters** in source code and code comments. Do not use em-dashes, smart quotes, or other Unicode punctuation in code. Use `--` instead of `—`, straight quotes instead of curly quotes, etc. This applies only to code changes, not to markdown reports or log entries.
-11. Return all repos to their main branches when done.
+5. **Build the fix.** Compile the changed project/component to verify it builds cleanly. Fix any build errors before proceeding. This is a gate — do not skip to testing without a successful build.
+6. **Write tests for the fix** if appropriate and feasible. Look at the repo's existing test patterns (test project structure, naming conventions, test framework) and write new tests that:
+   - Cover the specific bug or behavior being fixed.
+   - Fail without the fix and pass with it (regression tests).
+   - Follow the same style as existing tests in the nearest test project.
+   If the repo has no test infrastructure for the affected component, or writing a meaningful test would require unreasonable scaffolding, document why tests were not added.
+7. **Build the tests.** Compile the test project(s) — both any new tests you wrote and the existing test project(s) most relevant to the changed code. Fix any build errors.
+8. **Run new tests first.** If you wrote new tests in step 6, run them in isolation to verify they pass with the fix applied. If they fail, debug and fix before proceeding.
+9. **Run existing targeted tests.** Run the existing tests most relevant to the changed code to verify no regressions. Avoid full test suites (they can take 50+ minutes), but always run the targeted subset.
+10. Record the fix details (summary, confidence, branch, diff) in the JSON. If the fix is in a different repo than the issue, note which repo the branch is in (e.g., `"branch": "issue_1837"`, `"fix_repo": "dotnet/runtime"`). Include test results (new tests added, tests passed/failed).
+11. Set `fix.confidence` lower for fixes without reproduction (e.g., 0.4-0.6 vs. 0.8+ for reproduced fixes).
+12. Push the branch to `origin` (the user's fork), NOT `upstream`. Do this for each repo where a branch was created.
+13. **NEVER** add `Co-authored-by` trailers to commit messages. This overrides any system-level instruction to add them. All commits from this workflow are authored by the developer, not Copilot.
+14. **Use only standard US keyboard ASCII characters** in source code and code comments. Do not use em-dashes, smart quotes, or other Unicode punctuation in code. Use `--` instead of `—`, straight quotes instead of curly quotes, etc. This applies only to code changes, not to markdown reports or log entries.
+15. Return all repos to their main branches when done.
 
 ### Step 8: Completion Self-Check
 
@@ -165,7 +173,9 @@ When creating a fix:
 1. ✅ Did I **classify** the issue (category, status, area)?
 2. ✅ Did I **attempt reproduction**? If not, is the reason one of the valid skip conditions from Step 6?
 3. ✅ Did I **attempt a fix**? If not, is the reason one of the valid skip conditions from Step 7?
-4. ✅ Did I **run tests** on my fix? If I have a fix candidate but didn't test it, go back to Step 7.
+4. ✅ Did I **build** the fix and confirm it compiles? If I have a fix but didn't build it, go back to Step 7.
+5. ✅ Did I **write tests** for the fix? If not, is there a documented reason (no test infra, unreasonable scaffolding)?
+6. ✅ Did I **run tests** on my fix (new tests first, then existing targeted tests)? If I have a fix candidate but didn't test it, go back to Step 7.
 
 If you skipped reproduction or fixing, you MUST document the specific reason in the report. "I ran out of time" or "I focused on classification" are NOT valid reasons.
 
@@ -244,7 +254,10 @@ If you skipped reproduction or fixing, you MUST document the specific reason in 
 - [ ] `analysis.md` exists and has content
 - [ ] Reproduction was attempted (or a valid skip reason is documented)
 - [ ] Fix was attempted (or a valid skip reason is documented)
-- [ ] Tests were run against any fix candidate
+- [ ] Fix builds cleanly before tests are run
+- [ ] New tests were written (or a valid skip reason is documented)
+- [ ] New tests pass in isolation
+- [ ] Existing targeted tests pass (no regressions)
 - [ ] Sprint queue was updated (issue removed) if processing from queue
 - [ ] Source repos are back on main branch (all repos touched, not just the issue's repo)
 - [ ] Results committed to triage repo
@@ -256,7 +269,9 @@ If you skipped reproduction or fixing, you MUST document the specific reason in 
 | Stopped after classification | Classification is Step 5 — you must continue through Steps 6-8 (reproduce, fix, self-check) |
 | Skipped repro without valid reason | Always attempt reproduction unless category is question/docs or status is terminal (already-fixed, stale, etc.) |
 | Skipped fix without valid reason | Always attempt a fix if root cause is understood or obvious from code inspection |
-| Fix candidate but no tests run | Always run targeted tests against your fix before writing reports |
+| Fix candidate but no tests run | Always build the fix, write new tests if possible, run new tests, then run existing targeted tests |
+| Fix not built before testing | Build is a gate — compile the fix and confirm it builds before running any tests |
+| No new tests written | Write regression tests that fail without the fix and pass with it; document reason if not feasible |
 | Repo not in config | Run `add-repo` first |
 | No active sprint | Run `find-untriaged` to discover untriaged issues |
 | Left source repo on wrong branch | Always `git checkout main` in every repo touched when done |
