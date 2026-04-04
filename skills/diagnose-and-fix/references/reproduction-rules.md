@@ -84,7 +84,7 @@ The goal is to produce a proposed fix the developer can review to understand the
 ## Platform-Specific Notes
 
 ### Windows
-- You may have access to `cdb.exe` for SOS debugging. Check `config/repos.json` for debugger paths.
+- You may have access to `cdb.exe` for SOS debugging. Check the `load-information` output for debugger tool names, then match against the TOOLS section for paths.
 - Use worktrees if other agents may be sharing the repo checkout.
 
 ### Linux

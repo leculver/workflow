@@ -43,11 +43,11 @@ Invoke `bookkeeping` to pull the triage repo and flush any pending `.bookkeeping
 Before doing anything else, gather ALL context:
 
 **a) Load configuration:**
-- Read `config/repos.json` from the triage repo root.
-- Find the entry for the issue's repo and load its `related_repos` with their local checkout paths.
+- Invoke the `load-information` skill to get repo configuration.
+- The `load-information` output includes related repos and local paths.
 - These related repos are part of the investigation scope — the root cause or fix may live in any of them.
-- **Load `coding_guidelines`** — if the repo has a `coding_guidelines` array, load it and include in the briefing. These must be followed when writing or modifying code during the session.
-- **Load local tools** — read `config/local-tools.json` via `local-tools` (action: `list`). This puts tool paths in context for the interactive session so you can launch debuggers, analyzers, etc. without searching.
+- **Load `coding_guidelines`** — if the repo has a `coding_guidelines` section (from `load-information` or `config/repos.yaml`), load it and include in the briefing. These must be followed when writing or modifying code during the session.
+- **Tool paths** are included in the `load-information` output under the TOOLS section. This puts tool paths in context for the interactive session so you can launch debuggers, analyzers, etc. without searching.
 
 **b) Infer repo if not provided:**
 - Search `issues/*/issue_number/analysis.json` across all repo directories in the triage repo.

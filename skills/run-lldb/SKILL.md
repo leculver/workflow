@@ -22,9 +22,9 @@ Launch LLDB to run debugger commands against dumps or live processes.
 
 ### Step 1: Resolve LLDB
 
-Use the `local-tools` skill to resolve the `lldb` tool path. This handles lookup, search, user prompting, and registration automatically.
+Use the `load-information` skill to resolve the `lldb` tool path. If the tool isn't registered yet, use the `add-tool` skill to search for it and register it.
 
-If `local-tools` reports LLDB as unavailable, stop and inform the user.
+If LLDB is reported as unavailable, stop and inform the user.
 
 ### Step 2: Ensure SOS Is Installed
 

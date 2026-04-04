@@ -40,7 +40,7 @@ Invoke `bookkeeping` to pull the triage repo and flush any pending `.bookkeeping
 
 ### Step 1: Gather Data
 
-1. Read `config/repos.json` to get the list of configured repos.
+1. Invoke `load-information` skill to get the list of configured repos.
 2. If `repo` is specified, filter to just that repo.
 3. For each repo:
    a. Read all `issues/<owner>-<repo>/*/analysis.json` files.

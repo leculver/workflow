@@ -4,7 +4,7 @@
 Outputs a concise summary to stdout and writes full JSON data to a temp file.
 """
 
-import argparse, json, os, shutil, subprocess, sys, tempfile
+import argparse, json, os, re, shutil, subprocess, sys, tempfile
 
 
 def get_open_issues(owner, repo):
@@ -17,11 +17,10 @@ def get_open_issues(owner, repo):
         [gh, "api", "--paginate",
          f"/repos/{owner}/{repo}/issues?state=open",
          "--jq", '.[] | select(.pull_request == null) | {number, title, created_at}'],
-        capture_output=True, text=True, encoding="utf-8", check=True
+        capture_output=True, text=True, check=True
     )
     issues = []
-    stdout = result.stdout or ""
-    for line in stdout.strip().split('\n'):
+    for line in result.stdout.strip().split('\n'):
         if line:
             issues.append(json.loads(line))
     return issues
@@ -63,21 +62,26 @@ def print_summary(results, show_max=10):
 def main():
     parser = argparse.ArgumentParser(description="Find open GitHub issues that haven't been triaged yet.")
     parser.add_argument("--repo", help="owner/repo to check (default: all)")
-    parser.add_argument("--config", default="config/repos.json")
+    parser.add_argument("--config", default="config/repos.yaml")
     parser.add_argument("--issues-dir", default="issues")
     parser.add_argument("--show", type=int, default=10, help="Max issues to show per repo (default: 10)")
     args = parser.parse_args()
 
-    with open(args.config, encoding="utf-8") as f:
-        config = json.load(f)
+    # Parse top-level keys from repos.yaml (e.g. "dotnet/diagnostics:")
+    # to extract owner/name pairs without requiring a YAML library.
+    repo_keys = []
+    with open(args.config) as f:
+        for line in f:
+            m = re.match(r'^(\S+/\S+)\s*:', line)
+            if m:
+                repo_keys.append(m.group(1))
 
     results = []
-    for repo_key, repo_cfg in config["repos"].items():
+    for repo_key in repo_keys:
         if args.repo and repo_key != args.repo:
             continue
 
-        owner = repo_cfg["owner"]
-        name = repo_cfg["name"]
+        owner, name = repo_key.split("/", 1)
         dir_name = f"{owner}-{name}"
 
         open_issues = get_open_issues(owner, name)

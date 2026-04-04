@@ -24,6 +24,11 @@ Outputs:
 import json, os, re, sys
 from datetime import datetime, timezone
 
+# Import the YAML parser from the load-information skill (avoids duplicating
+# the parser and avoids a pyyaml dependency).
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'load-information', 'scripts'))
+from load_information import parse_yaml
+
 
 def main():
     if len(sys.argv) != 5:
@@ -45,17 +50,17 @@ def main():
     with open(prs_path, "r", encoding="utf-8") as f:
         prs = json.load(f)
 
-    # Load area config
-    config_path = os.path.join(base, "config", "repos.json")
+    # Load area config from repos.yaml
+    config_path = os.path.join(base, "config", "repos.yaml")
     with open(config_path, "r", encoding="utf-8") as f:
-        config = json.load(f)
-    areas_config = config["repos"][full_repo].get("areas", {})
+        config = parse_yaml(f.read())
+    areas_config = config.get(full_repo, {}).get("areas", {})
 
     # Load user config for PR author filtering
-    user_config_path = os.path.join(base, "config", "user.json")
-    with open(user_config_path, "r", encoding="utf-8") as f:
-        user_config = json.load(f)
-    username = user_config["login"].lower()
+    local_config_path = os.path.join(base, "config", "local.yaml")
+    with open(local_config_path, "r", encoding="utf-8") as f:
+        local_config = parse_yaml(f.read())
+    username = local_config["user"]["login"].lower()
 
     # Build PR -> issue map (only include PRs from the configured user)
     prs = [pr for pr in prs if pr.get("author", "").lower() == username]

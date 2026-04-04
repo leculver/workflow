@@ -39,7 +39,7 @@ Invoke `bookkeeping` to pull the triage repo and flush any pending `.bookkeeping
 
 ### Step 1: Gather Fix Candidates
 
-1. Read `config/repos.json` for repo paths.
+1. Invoke `load-information` skill to get repo local paths.
 2. Scan all `issues/<owner>-<repo>/*/analysis.json` files.
 3. Collect issues where `fix.has_candidate == true`.
 4. If `issue_number` is provided, filter to just that one.

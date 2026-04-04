@@ -6,7 +6,7 @@ The summary follows this exact section order:
 
 1. **Overview** — Stats table with counts
 2. **Changes Since Last Summary** — What's new (only if a prior summary exists)
-3. **Open Pull Requests** — Open PRs authored by the configured user (from `config/user.json`) with linked issues
+3. **Open Pull Requests** — Open PRs authored by the configured user (from `config/local.yaml`) with linked issues
 4. **Area sections** — One section per area (e.g., SOS, dotnet-dump), sorted by issue count descending. Only issues NOT in the "should close", "blocked", or "docs" sections.
 5. **Documentation Issues** — All docs issues in a single flat table (not split by area)
 6. **Blocked Issues** — Issues blocked on external dependencies, upstream fixes, or unreleased packages
@@ -39,7 +39,7 @@ The summary follows this exact section order:
 
 ## Open Pull Requests
 
-Only include PRs authored by the configured user (from `config/user.json`).
+Only include PRs authored by the configured user (from `config/local.yaml`).
 
 | PR | Author | Title | Linked Issues |
 |----|--------|-------|---------------|

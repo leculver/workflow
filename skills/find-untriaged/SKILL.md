@@ -40,7 +40,7 @@ python .agents/skills/find-untriaged/find_untriaged.py [--repo owner/repo] [--sh
 ```
 
 The script:
-1. Reads `config/repos.json` for the repo list
+1. Reads `config/repos.yaml` for the repo list
 2. Calls `gh api --paginate` to get all open issues per repo
 3. Scans `issues/<owner>-<repo>/*/analysis.json` for triaged issues
 4. Prints a concise summary to stdout (10 newest untriaged per repo by default)

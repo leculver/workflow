@@ -41,8 +41,8 @@ The locally built SOS is at:
 ```
 
 Examples:
-- `git/diagnostics/artifacts/bin/Windows_NT.x64.Debug/sos.dll`
-- `git/diagnostics/artifacts/bin/Windows_NT.x86.Release/sos.dll`
+- `git\diagnostics\artifacts\bin\Windows_NT.x64.Debug\sos.dll`
+- `git\diagnostics\artifacts\bin\Windows_NT.x86.Release\sos.dll`
 
 Before using this skill, verify the SOS DLL exists at the expected path. If it doesn't, tell the user to build the diagnostics repo first.
 
@@ -50,11 +50,11 @@ Before using this skill, verify the SOS DLL exists at the expected path. If it d
 
 ### Step 0: Resolve Tools
 
-Use `local-tools` to resolve the `cdb` path.
+Use `add-tool` to resolve the `cdb` path (or check the `load-information` output for available tools).
 
 ### Step 1: Determine SOS Path
 
-1. Resolve `diagnostics_path` — from input, or `./git/diagnostics`, or from `config/repos.json`.
+1. Resolve `diagnostics_path` — from input, or `./git/diagnostics`, or from the `load-information` output.
 2. Build the SOS path: `<diagnostics_path>\artifacts\bin\Windows_NT.<arch>.<config>\sos.dll`
 3. Verify the file exists. If not, tell the user: "SOS not found at `<path>`. Build with `build.cmd` first."
 

@@ -34,14 +34,18 @@ gh repo create <name> --private
 git remote add origin <repo-url>
 ```
 
-## Step 2: Generate config/user.json
+## Step 2: Generate config/local.yaml
 
 ```bash
 mkdir -p config
-gh api user --jq '{login: .login, name: .name}' > config/user.json
+LOGIN=$(gh api user --jq '.login')
+cat > config/local.yaml <<EOF
+user:
+  login: $LOGIN
+EOF
 ```
 
-Read back the file and greet the user by name.
+Read back the file and greet the user by login.
 
 ## Step 3: Create Directory Structure
 
@@ -54,7 +58,7 @@ mkdir -p .github config issues summaries docs/notes docs/specs docs/study
 Write `.gitignore` with these rules (see the example in README.md for the full template):
 
 - `.bookkeeping/` — in-progress notes (flushed by bookkeeping) and deletion reminders
-- `config/local-tools.json` and `config/user.json` — machine-specific
+- `config/local.yaml` — machine-specific (local paths, tools, user identity)
 - Dump files (`*.dmp`, `*.crashreport.json`, `dumps/`)
 - Trace files (`*.nettrace`, `*.etl`, `*.perfcollect`)
 - .NET build artifacts (`bin/`, `obj/`, `*.dll`, `*.exe`, `*.pdb`, etc.)
@@ -70,23 +74,21 @@ Do NOT add sub-repo checkout entries yet — the `add-repo` skill handles that.
 
 Write the copilot instructions file. Use the example from README.md as a starting point, but keep the sub-repo checkouts section empty (repos will be added in the next step).
 
-## Step 6: Create config/repos.json
+## Step 6: Create config/repos.yaml
 
-```json
-{
-  "repos": {}
-}
+```yaml
+repos: {}
 ```
 
 ## Step 7: Initial Commit
 
 ```bash
-git add .gitignore .github/ config/repos.json
+git add .gitignore .github/ config/repos.yaml
 git commit -m "Initial triage workspace setup"
 git push -u origin main
 ```
 
-Note: `config/user.json` is gitignored — do not commit it.
+Note: `config/local.yaml` is gitignored — do not commit it.
 
 ## Step 8: Add First Repository
 
@@ -96,15 +98,15 @@ Then invoke the `add-repo` skill with that repository. The skill will:
 - Clone the repo locally (or validate an existing checkout)
 - Set up fork/upstream remotes
 - Auto-detect area labels
-- Update `config/repos.json`
+- Update `config/repos.yaml`
 - Add the checkout directory to `.gitignore`
 
 ## Step 9: Verify
 
 Run a quick check:
 1. `git status` — working tree should be clean
-2. `config/user.json` exists and has the user's login
-3. `config/repos.json` has at least one repo entry
+2. `config/local.yaml` exists and has the user's login
+3. `config/repos.yaml` has at least one repo entry
 4. The cloned repo directory exists and has correct remotes
 5. `.gitignore` includes the cloned repo directory
 
@@ -123,5 +125,5 @@ Try:
 
 - The `.agents/` directory is the user's fork of the workflow repo. It has its own git history. Do NOT `git add .agents/` in the triage repo — it's a separate clone.
 - Skill modifications are committed and pushed to the user's fork of the workflow repo, not to the triage repo.
-- All skills read the GitHub username from `config/user.json`, never hardcode it.
-- The `bookkeeping` skill runs automatically at the start of other skills. It pulls the triage repo and regenerates `config/user.json` if missing.
+- All skills read the GitHub username from `config/local.yaml` (under `user.login`), never hardcode it.
+- The `bookkeeping` skill runs automatically at the start of other skills. It pulls the triage repo and regenerates the user section in `config/local.yaml` if missing.

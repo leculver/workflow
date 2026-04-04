@@ -52,7 +52,7 @@ Invoke `bookkeeping` to pull the triage repo and flush any pending `.bookkeeping
 ### Step 1: Select Repository
 
 1. If `repo` is provided, use it.
-2. If not, read `config/repos.json` and check which repos have triaged issues (glob `issues/<owner>-<repo>/*/analysis.json`).
+2. If not, read `config/repos.yaml` (or invoke `load-information`) and check which repos have triaged issues (glob `issues/<owner>-<repo>/*/analysis.json`).
 3. If only one repo has issues, use that.
 4. If multiple, ask the user which repo to summarize.
 
@@ -71,7 +71,7 @@ Invoke `bookkeeping` to pull the triage repo and flush any pending `.bookkeeping
 
 ### Step 3: Fetch Open PRs
 
-1. Read the GitHub username from `config/user.json` (the `login` field). Use GitHub MCP tools: `search_pull_requests` for the repo, state=open, author=`<login>`, perPage=100.
+1. Read the GitHub username from `config/local.yaml` (the `user.login` field) or from the `load-information` output. Use GitHub MCP tools: `search_pull_requests` for the repo, state=open, author=`<login>`, perPage=100.
 2. Extract PR number, title, author, html_url.
 3. Parse PR bodies AND titles for linked issues using ALL these patterns:
    - `fixes #N`, `closes #N`, `resolves #N` (case-insensitive)
@@ -84,7 +84,7 @@ Invoke `bookkeeping` to pull the triage repo and flush any pending `.bookkeeping
 ### Step 4: Categorize Issues into Sections
 
 **Section 1 — By Area:**
-Everything not in "should close", "blocked", or "docs" sections, classified using the area rules from `config/repos.json`. Sort area subsections by issue count descending. Issues not matching any area go in "Other / General".
+Everything not in "should close", "blocked", or "docs" sections, classified using the area rules from `config/repos.yaml`. Sort area subsections by issue count descending. Issues not matching any area go in "Other / General".
 
 **Section 2 — Documentation Issues:**
 Issues with category `docs` that are NOT in the "should close" section. Single combined table (not split by area).
@@ -122,7 +122,7 @@ Column details:
 Include before the issue sections (in this order):
 1. **Overview stats table**: Total issues, open/closed counts, fix candidates, manually investigated, by-status breakdown.
 2. **Changes Since Last Summary**: What's new since the prior summary (only if a prior summary exists). See Step 5.
-3. **Open Pull Requests table**: Open PRs authored by the configured user (from `config/user.json`) with linked issues.
+3. **Open Pull Requests table**: Open PRs authored by the configured user (from `config/local.yaml`) with linked issues.
 
 See [summary format reference](references/summary-format.md) for the full template.
 

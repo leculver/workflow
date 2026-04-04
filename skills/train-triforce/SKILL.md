@@ -28,7 +28,7 @@ three panes: training output (top), tensorboard (bottom-left), and a venv consol
 
 | Input | Required | Description |
 |-------|----------|-------------|
-| scenario | Yes | The scenario or circuit name to train on (first positional arg to `train.py`). |
+| scenario | No | The scenario or circuit name to train on (first positional arg to `train.py`). Default: `all-items-circuit`. |
 | action_space | No | Action space name. Default: `all-items`. Options: `basic`, `move-only`, `all-items`. |
 | model_kind | No | Model architecture. Default: `impala-multihead`. Options: `shared-nature`, `multihead`, `impala-shared`, `impala-multihead`. |
 | extra_args | No | Any additional CLI flags for train.py (see reference below). |

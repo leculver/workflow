@@ -33,11 +33,12 @@ Pull the triage repo, run the bookkeeping processor, flush logs, and check delet
 1. `git fetch` and `git pull` in the triage repo root.
 2. If you have already done this earlier in the session (or remember doing so), skip this step.
 
-### Step 1.5: Ensure config/user.json
+### Step 1.5: Ensure config/local.yaml has user identity
 
-1. Check if `config/user.json` exists in the triage repo root.
-2. If missing, generate it by running: `gh api user --jq '{login: .login, name: .name}'` and writing the output to `config/user.json`.
-3. If it already exists, skip this step.
+1. Check if `config/local.yaml` exists and has a `user.login` field.
+2. If missing, generate it by running: `gh api user --jq '.login'` and writing the result to `config/local.yaml` under `user.login`.
+3. If `config/local.yaml` exists but lacks `user.login`, add the field to the existing file.
+4. If it already has `user.login`, skip this step.
 
 This file is gitignored (machine-specific) and provides the GitHub username for skills that need it (e.g., generate-summary filters PRs by author).
 
@@ -108,7 +109,7 @@ Bulk-refresh `github.json` files for issues that may have changed on GitHub.
 
 1. Read `config/refresh-state.json` (gitignored, machine-local). This is a JSON object mapping `owner/repo` → ISO 8601 timestamp of the last bulk scan. If the file doesn't exist, create it with empty `{}`.
 
-2. For each configured repo in `config/repos.json`:
+2. For each configured repo (invoke `load-information` to get the repo list):
    a. Read the repo's last scan timestamp from `refresh-state.json`. If missing, treat as "never scanned" — use a timestamp far enough back to cover all tracked issues (e.g., 2 years ago).
    b. **Skip if the last scan was less than 6 hours ago.**
    c. Query GitHub: `GET /repos/{owner}/{repo}/issues?since={last_scan}&state=all&per_page=100` (paginate).

@@ -92,7 +92,7 @@ Markdown report following the learning-focused format defined in `diagnose-and-f
 
 - `manually_investigated` is always `false` unless set by `load-issue`. Only that skill sets it to `true` — all other automated skills leave it as `false` or preserve the existing value.
 - Write atomically: write to `.json.tmp` then rename to `.json`.
-- `affected_repo` should match a key in `config/repos.json` `related_repos` or the main repo name.
+- `affected_repo` should match a key in `config/repos.yaml` `related_repos` or the main repo name.
 - `reproduction.artifacts` should list paths to repro source and scripts (committed), NOT dump files (gitignored).
 - Always include a `repro/` directory with source code and a `repro.sh`/`repro.bat` to regenerate dumps.
 - Log entries are appended to the `log` array in `analysis.json` — never overwrite prior entries.

@@ -5,7 +5,7 @@ description: >
   runs targeted tests, and writes structured reports. Use when the user says "diagnose", "fix", "triage",
   "work on", or "investigate" an issue. Always attempts reproduction AND a fix — the goal is a working
   fix candidate, not just classification. Do NOT use when the user says "load", "continue", or "pick up"
-  an issue — that is load-issue. Reads repo config from config/repos.json.
+  an issue — that is load-issue. Reads repo config via the load-information skill.
 ---
 
 # Diagnose and Fix
@@ -42,12 +42,11 @@ Invoke `bookkeeping` to pull the triage repo and flush any pending `.bookkeeping
 
 ### Step 1: Load Configuration
 
-1. Read `config/repos.json` from the triage repo root.
-2. Find the entry for the requested `repo`.
-3. Load area classification rules, local paths, debugger paths, and dump env vars.
+1. Invoke the `load-information` skill (run `python .agents/skills/load-information/scripts/load_information.py`) to get repo configuration.
+2. Parse the output for the requested `repo` — it includes local paths, related repos, debugger tools, and dump env vars.
 4. **Also load `related_repos`** — these are repos where the root cause or fix may live. Note their local checkout paths.
 5. **Load `coding_guidelines`** — if the repo has a `coding_guidelines` array, load it. These are repo-specific rules about preferred APIs, patterns, and conventions that must be followed when writing fixes.
-6. **Load local tools** — read `config/local-tools.json` via `local-tools` (action: `list`). This puts tool paths in context so you don't need to search for them during reproduction or fix attempts.
+6. **Tool paths** are included in the `load-information` output under the TOOLS section. These are already in context so you don't need to search for them during reproduction or fix attempts.
 7. If the repo is not configured, stop and tell the user to run `add-repo` first.
 
 ### Step 2: Select the Issue
@@ -101,7 +100,7 @@ Quickly classify the issue. This is a **preliminary step** — spend most of you
 1. **Category**: bug, feature-request, question, or docs.
 2. **Status** (initial): See [triage categories](references/triage-categories.md).
 3. **Staleness**: active, stale, or superseded.
-4. **Area**: Classify using the area rules from `config/repos.json`.
+4. **Area**: Classify using the area rules from `config/repos.yaml` (read directly only for full area definitions with labels/keywords needed for classification).
 5. **Platform requirements**: Which platforms are needed to reproduce?
 6. **Blocked**: If the issue depends on an external fix, unreleased package, or upstream change, set status to `blocked` with `blocked_reason` and optionally `blocked_url`.
 7. **Affected repo**: Determine where the root cause actually lives. Set `affected_repo` to the repo where the bug or missing feature actually is. If the root cause spans multiple repos, set `affected_repo` to the primary one and note the others in `status_reason`.
