@@ -115,6 +115,98 @@ training/
 
 ## Workflow
 
+### Step 0: Search for Resumable Checkpoints
+
+Before starting a fresh training run, check if any saved checkpoints in `models/` **and** `training/` can give us a head start. Each `.pt` file contains a `training_history` list describing what scenarios it was already trained on. Training checkpoints from partial runs are often further along than models/, so both must be scanned.
+
+**Scan `models/` and `training/` for compatible checkpoints:**
+
+```bash
+cd ~/work/git/triforce && source .venv/bin/activate && python3 -c "
+import torch, os, sys, glob
+from triforce.scenario_wrapper import TrainingCircuitDefinition
+
+circuit_name = sys.argv[1]
+circuit_def = TrainingCircuitDefinition.get(circuit_name)
+if circuit_def is None:
+    print(f'Not a circuit: {circuit_name}')
+    sys.exit(0)
+
+# Build ordered list of scenario names in the target circuit
+circuit_scenarios = []
+for entry in circuit_def.scenarios:
+    if entry.circuit:
+        circuit_scenarios.append(f'[circuit] {entry.circuit}')
+    else:
+        circuit_scenarios.append(entry.scenario)
+
+print(f'Circuit legs: {circuit_scenarios}')
+print()
+
+def scan_checkpoint(path, best_match, best_count, best_steps):
+    try:
+        data = torch.load(path, weights_only=False)
+    except Exception:
+        return best_match, best_count, best_steps
+    history = data.get('training_history') or []
+    steps = data.get('steps_trained', 0)
+    if not history:
+        return best_match, best_count, best_steps
+
+    match_count = 0
+    for i, leg in enumerate(circuit_scenarios):
+        if i >= len(history):
+            break
+        if history[i].get('scenario') == leg:
+            match_count += 1
+        else:
+            break
+
+    if match_count > 0:
+        em = history[match_count - 1].get('exit_metric', {})
+        metric_str = f\"{em.get('name')}: {em.get('actual')}\" if em.get('name') else 'no metric'
+        print(f'{path}: covers {match_count}/{len(circuit_scenarios)} legs, steps={steps} ({metric_str})')
+        if match_count > best_count or (match_count == best_count and steps > best_steps):
+            best_count = match_count
+            best_match = path
+            best_steps = steps
+
+    return best_match, best_count, best_steps
+
+best_match = None
+best_count = 0
+best_steps = 0
+
+# Scan models/
+if os.path.isdir('models'):
+    for f in sorted(os.listdir('models')):
+        if f.endswith('.pt'):
+            best_match, best_count, best_steps = scan_checkpoint(
+                os.path.join('models', f), best_match, best_count, best_steps)
+
+# Scan training/ (partial runs often have more progress)
+for pt_file in sorted(glob.glob('training/**/*.pt', recursive=True), key=os.path.getmtime, reverse=True):
+    best_match, best_count, best_steps = scan_checkpoint(pt_file, best_match, best_count, best_steps)
+
+if best_match:
+    print(f'\nBest resumable checkpoint: {best_match} ({best_count} legs, {best_steps} steps)')
+else:
+    print('\nNo resumable checkpoints found — training from scratch.')
+" "<scenario>"
+```
+
+Replace `<scenario>` with the target circuit name (e.g., `all-items-circuit`).
+
+**Decision logic:**
+- If a resumable checkpoint is found, **ask the user**: "Found `<checkpoint>` covering N of M legs (last: `<scenario>` with `<metric>: <value>`). Resume from there or train from scratch?"
+- If the user wants to resume, add `--load <checkpoint> --resume` to the training command.
+- If no checkpoint matches or the user declines, train from scratch.
+
+**What makes a good match:**
+- The checkpoint's `training_history` scenarios must match the **first N legs** of the target circuit **in order**.
+- More matched legs = more time saved (each leg can take hours).
+- The exit metrics in the history show whether each leg met its threshold — prefer checkpoints where metrics were met.
+
 ### Step 1: Check for Running Training
 
 Check if a `train.py` process is already running:
@@ -129,26 +221,33 @@ If a training process is found:
 
 ### Step 2: Gracefully Stop Existing Training (if needed)
 
-The training TUI listens for `q` keypresses. Send `q` twice to trigger a graceful shutdown:
+First, detect the tmux window number (varies depending on `base-index` config):
 
-1. Identify the tmux pane running training (top pane of the "training" session):
+```bash
+WIN=$(tmux list-windows -t training -F '#{window_index}' 2>/dev/null | head -1)
+```
+
+If `$WIN` is non-empty and a training session exists, use the TUI's `q` keypress to stop gracefully:
+
+1. Send `q` twice to trigger shutdown:
    ```bash
-   tmux send-keys -t training:0.0 q
+   tmux send-keys -t training:${WIN}.0 q
    sleep 1
-   tmux send-keys -t training:0.0 q
+   tmux send-keys -t training:${WIN}.0 q
    ```
 2. Wait up to **2 minutes** for the process to exit. Poll every 5 seconds:
    ```bash
-   # Check if train.py is still running
    pgrep -f 'train\.py'
    ```
-3. If the process is still running after 2 minutes, **kill it**:
+3. If the process is still running after 2 minutes, **kill it by PID**:
    ```bash
-   kill $(pgrep -f 'train\.py')
+   kill <PID>   # use the PID from pgrep output
    ```
-4. Wait a few seconds and verify it's dead. If it's still running, use `kill -9`.
+4. Wait a few seconds and verify it's dead. If it's still running, use `kill -9 <PID>`.
 
-### Step 3: Create or Reset the tmux Session
+If no tmux session exists but `train.py` is running anyway, skip straight to `kill <PID>`.
+
+### Step 3: Reuse or Create the tmux Session
 
 Check if the "training" tmux session exists:
 
@@ -156,63 +255,63 @@ Check if the "training" tmux session exists:
 tmux has-session -t training 2>/dev/null
 ```
 
-**If the session exists**, kill it and recreate it to get a clean layout:
+**If the session already exists — reuse it.** The tensorboard and console panes are long-lived and don't need
+to be recreated. Detect the window number and skip to Step 7 to launch the new training command in the top pane:
 
 ```bash
-tmux kill-session -t training
+WIN=$(tmux list-windows -t training -F '#{window_index}' | head -1)
+# Now use training:${WIN}.0 for the top pane, .1 for tensorboard, .2 for console
 ```
 
-**Create the session** (detached, so it doesn't steal our terminal):
+**If the session does NOT exist**, create it and set up the full layout (Steps 4–6):
 
 ```bash
 tmux new-session -d -s training -x 200 -y 50
 ```
 
-### Step 4: Set Up the Pane Layout
+Then detect the window number for subsequent pane references:
+
+```bash
+WIN=$(tmux list-windows -t training -F '#{window_index}' | head -1)
+```
+
+### Step 4: Set Up the Pane Layout (new session only)
 
 Split into three panes — training (top), tensorboard (bottom-left), console (bottom-right):
 
 ```bash
-# Split vertically: creates top (pane 0) and bottom (pane 1)
-tmux split-window -v -t training:0.0
-
-# Split the bottom pane horizontally: creates bottom-left (pane 1) and bottom-right (pane 2)
-tmux split-window -h -t training:0.1
-
-# Make the top pane larger (training output needs more space)
-tmux resize-pane -t training:0.0 -y 70%
+tmux split-window -v -t training:${WIN}.0
+tmux split-window -h -t training:${WIN}.1
+tmux resize-pane -t training:${WIN}.0 -y 70%
 ```
 
-### Step 5: Start TensorBoard (bottom-left pane)
+### Step 5: Start TensorBoard (new session only, bottom-left pane)
 
 ```bash
-tmux send-keys -t training:0.1 'cd ~/work/git/triforce && source .venv/bin/activate && tensorboard --logdir training --host 0.0.0.0' Enter
+tmux send-keys -t training:${WIN}.1 'cd ~/work/git/triforce && source .venv/bin/activate && tensorboard --logdir training --host 0.0.0.0' Enter
 ```
 
-### Step 6: Set Up Console (bottom-right pane)
+### Step 6: Set Up Console (new session only, bottom-right pane)
 
 ```bash
-tmux send-keys -t training:0.2 'cd ~/work/git/triforce && source .venv/bin/activate' Enter
+tmux send-keys -t training:${WIN}.2 'cd ~/work/git/triforce && source .venv/bin/activate' Enter
 ```
 
 ### Step 7: Start Training (top pane)
 
-Build the training command from the user's inputs. The pattern is:
+Build the training command from the user's inputs and send it to the top pane of the (existing or new) session:
 
 ```bash
-tmux send-keys -t training:0.0 'cd ~/work/git/triforce && source .venv/bin/activate && ./train.py <scenario> [action_space] [model_kind] [extra_args]' Enter
+tmux send-keys -t training:${WIN}.0 'cd ~/work/git/triforce && source .venv/bin/activate && ./train.py <scenario> [action_space] [model_kind] [extra_args]' Enter
 ```
 
 **Example commands:**
 ```bash
 # Basic scenario training
-tmux send-keys -t training:0.0 'cd ~/work/git/triforce && source .venv/bin/activate && ./train.py dungeon1-circuit' Enter
-
-# With specific action space and model
-tmux send-keys -t training:0.0 'cd ~/work/git/triforce && source .venv/bin/activate && ./train.py overworld-room-walk basic shared-nature --iterations 100000' Enter
+tmux send-keys -t training:${WIN}.0 'cd ~/work/git/triforce && source .venv/bin/activate && ./train.py dungeon1-circuit' Enter
 
 # Resume from checkpoint
-tmux send-keys -t training:0.0 'cd ~/work/git/triforce && source .venv/bin/activate && ./train.py all-items-circuit --load training/all-items-circuit/2/checkpoints/latest.pt --resume' Enter
+tmux send-keys -t training:${WIN}.0 'cd ~/work/git/triforce && source .venv/bin/activate && ./train.py all-items-circuit --load training/all-items-circuit/2/checkpoints/latest.pt --resume' Enter
 ```
 
 ### Step 8: Confirm to User
@@ -226,7 +325,7 @@ Tell the user:
 ## Validation
 
 - [ ] `pgrep -f 'train\.py'` shows the training process is running
-- [ ] `tmux list-panes -t training` shows 3 panes
+- [ ] `tmux list-panes -t training` shows 3 panes (reused or freshly created)
 - [ ] TensorBoard is accessible on port 6006
 - [ ] Training output is visible in the top pane (`tmux capture-pane -t training:0.0 -p | tail -5`)
 
@@ -234,12 +333,14 @@ Tell the user:
 
 | Pitfall | Solution |
 |---------|----------|
-| tmux session already exists with wrong layout | Kill and recreate the session (Step 3) |
+| tmux session already exists | Reuse it — only the top pane needs a new command. Don't kill the session. |
+| tmux session has wrong layout (not 3 panes) | Kill and recreate the session (Steps 3–6) |
 | train.py won't die with `q` | Wait the full 2 minutes, then `kill`, then `kill -9` |
 | TensorBoard port already in use | Kill old tensorboard process first: `pkill -f tensorboard` before starting new one |
 | Wrong scenario name | Check the scenario/circuit lists above — names must match exactly |
 | CUDA out of memory | Reduce `--parallel` (default 16), try `--parallel 8` or `--parallel 4` |
 | Want to resume a circuit | Use `--load <checkpoint.pt> --resume` to continue where it left off |
+| Resumable checkpoints exist | Always run Step 0 to check `models/` and `training/` before starting fresh — can save hours |
 | venv not activated | All commands source `.venv/bin/activate` first — ensure the venv exists |
 | `./train.py` permission denied | Run `chmod +x ~/work/git/triforce/train.py` |
 | Multiple train.py processes | This skill checks `pgrep -f 'train\.py'` — kill all before starting a new run |
